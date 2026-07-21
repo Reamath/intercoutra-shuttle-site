@@ -51,28 +51,29 @@
     <div class="contact-grid">
       <div class="contact-card">
         <h2 style="font-size:20px;margin-bottom:18px;">Request a Booking</h2>
-        <div class="form-field"><label>Full Name</label><input type="text" placeholder="Your full name"></div>
-        <div class="form-field"><label>Email</label><input type="email" placeholder="you@email.com"></div>
-        <div class="form-field"><label>Contact Number</label><input type="tel" placeholder="+268 ..."></div>
+        <div class="form-field"><label>Full Name</label><input type="text" id="ctName" placeholder="Your full name"></div>
+        <div class="form-field"><label>Email</label><input type="email" id="ctEmail" placeholder="you@email.com"></div>
+        <div class="form-field"><label>Contact Number</label><input type="tel" id="ctPhone" placeholder="+268 ..."></div>
         <div class="form-field"><label>Route</label>
-          <select>
+          <select id="ctRoute">
             <option>Eswatini → Johannesburg</option>
             <option>Johannesburg → Eswatini</option>
             <option>Lesotho ↔ Johannesburg</option>
           </select>
         </div>
-        <div class="form-field"><label>Departure Date</label><input type="date"></div>
+        <div class="form-field"><label>Departure Date</label><input type="date" id="ctDate"></div>
         <div class="form-field"><label>Number of Passengers</label>
-          <select>
+          <select id="ctPax">
             <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
           </select>
         </div>
-        <div class="form-field"><label>Message (optional)</label><textarea rows="3" placeholder="Any special requests? (e.g. luggage size, trailer needed)"></textarea></div>
+        <div class="form-field"><label>Message (optional)</label><textarea rows="3" id="ctMessage" placeholder="Any special requests? (e.g. luggage size, trailer needed)"></textarea></div>
         <div class="popia-box">
           <input type="checkbox" id="popia-consent">
           <label for="popia-consent">I agree to my information being used to process this booking, in line with the <a href="privacy.html">Privacy Policy (POPIA)</a>. I understand I can opt in separately to receive marketing messages.</label>
         </div>
-        <button class="btn btn-red" style="width:100%;">Submit Booking Request</button>
+        <div id="ctError" style="display:none;margin-top:-6px;margin-bottom:14px;font-size:12.5px;color:var(--red);"></div>
+        <button class="btn btn-red" style="width:100%;" onclick="submitContactBooking()">Submit Booking Request</button>
       </div>
       <div>
         <div class="contact-card" style="margin-bottom:16px;">
@@ -142,5 +143,37 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script>
+  // Same WhatsApp number used by the homepage's quick-booking widget
+  // (footer's mobile-format contact number, no spaces/plus).
+  const CONTACT_WHATSAPP_NUMBER = '2687634043833';
+
+  function submitContactBooking(){
+    const errEl = document.getElementById('ctError');
+    errEl.style.display = 'none';
+
+    const name = document.getElementById('ctName').value.trim();
+    const email = document.getElementById('ctEmail').value.trim();
+    const phone = document.getElementById('ctPhone').value.trim();
+    const route = document.getElementById('ctRoute').value;
+    const date = document.getElementById('ctDate').value;
+    const pax = document.getElementById('ctPax').value;
+    const message = document.getElementById('ctMessage').value.trim();
+    const consent = document.getElementById('popia-consent').checked;
+
+    if(!name){ errEl.textContent = 'Please enter your full name.'; errEl.style.display = 'block'; return; }
+    if(!phone){ errEl.textContent = 'Please enter a contact number.'; errEl.style.display = 'block'; return; }
+    if(!date){ errEl.textContent = 'Please choose a departure date.'; errEl.style.display = 'block'; return; }
+    if(!consent){ errEl.textContent = 'Please confirm you agree to the Privacy Policy to continue.'; errEl.style.display = 'block'; return; }
+
+    const waMessage =
+      `Hi Intercoutra, I'd like to request a booking.\n\n` +
+      `Name: ${name}\nContact: ${phone}${email ? '\nEmail: ' + email : ''}\n` +
+      `Route: ${route}\nDate: ${date}\nPassengers: ${pax}${message ? '\nMessage: ' + message : ''}`;
+
+    const waLink = `https://wa.me/${CONTACT_WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`;
+    window.open(waLink, '_blank');
+  }
+</script>
 </body>
 </html>
