@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleet | Intercoutra</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="index.html" class="logo">
+      <img src="images/logo-intercoutra.png" alt="Intercoutra Shuttle Services" style="height:52px;width:auto;">
+    </a>
+    <nav class="main-nav"><ul><li><a href="index.html">Home</a></li>
+<li><a href="services.html">Services</a></li>
+<li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+<li><a href="fleet.html" class="active">Fleet</a></li>
+<li><a href="about.html">About Us</a></li>
+<li><a href="contact.html">Contact</a></li>
+</ul></nav>
+    <div class="nav-cta">
+      <a href="book.html" class="btn btn-red btn-sm">Book Now →</a>
+      <div class="hamburger" onclick="toggleMobileNav()"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <ul><li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="routes-schedules.html">Routes &amp; Schedules</a></li><li><a href="fleet.html" class="active">Fleet</a></li><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li></ul>
+    <div class="mnav-cta"><a href="book.html" class="btn btn-red" style="width:100%;text-align:center;">Book Now →</a></div>
+  </div>
+</header>
+
+
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">Our Fleet</div>
+    <h1>A Fleet Built for Every Journey</h1>
+    <p>Modern, well-maintained vehicles matched to your trip — from shared shuttles to private executive travel.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div id="fleetGalleryGrid" class="fleet-grid">
+      <!-- Populated by js/fleet-gallery.js -->
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox gallery modal -->
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <div class="lightbox-box">
+    <div class="lightbox-header">
+      <div>
+        <h3 id="lightboxTitle"></h3>
+        <p id="lightboxTagline"></p>
+      </div>
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+    <div class="lightbox-frame">
+      <img id="lightboxImage" src="" alt="">
+      <div class="lightbox-nav lightbox-prev" onclick="lightboxPrev()">‹</div>
+      <div class="lightbox-nav lightbox-next" onclick="lightboxNext()">›</div>
+    </div>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+    <div class="lightbox-thumbs" id="lightboxThumbs"></div>
+  </div>
+</div>
+
+<div class="cta-strip">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="left">
+        <div class="cta-icon">🚐</div>
+        <div><h3>Need a vehicle for your group?</h3><p>Tell us your headcount and route — we'll match the right fleet vehicle.</p></div>
+      </div>
+      <a href="contact.html" class="btn btn-white">Get a Quote →</a>
+    </div>
+  </div>
+</div>
+
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <img src="images/logo-intercoutra-white.png" alt="Intercoutra Shuttle Services" style="height:44px;width:auto;margin-bottom:6px;display:block;">
+        <p style="font-size:11px;font-style:italic;color:#9A9A9A;margin-bottom:14px;">Driven by Excellence, Defined by Comfort</p>
+        <p style="font-size:13.5px;max-width:260px;">Providing premium shuttle services across Eswatini, South Africa and Lesotho.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+          <li><a href="fleet.html">Fleet</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="manage.html">Manage Booking</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact Us</h4>
+        <ul>
+          <li>+268 2404 3033</li>
+          <li>+268 76 3404 3833</li>
+          <li>booking@intercoutra.com</li>
+          <li>Manzini, Eswatini</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 21v-8h2.7l.4-3.3H13V7.6c0-.95.3-1.6 1.6-1.6H16V3.1C15.7 3 14.7 3 13.6 3 11.3 3 9.7 4.4 9.7 6.9v2.8H7v3.3h2.7V21H13z"/></svg></a><a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="1" fill="currentColor" stroke="none"/></svg></a><a href="#" aria-label="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.3c1.4.8 3.1 1.3 4.8 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2zm5.4 14.2c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .5.4.2.5.7 1.7.7 1.9.1.2.1.3 0 .5-.1.2-.1.3-.3.5-.1.2-.3.4-.4.5-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.6.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.7.8.2.1.4.2.4.3.1.2.1.7-.1 1.3z"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Intercoutra Shuttle Services. All rights reserved. · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy Policy (POPIA)</a> · <a href="terms.html" style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a></div>
+    <div>Licensed cross-border operator</div>
+  </div>
+</footer>
+
+<script src="js/fleet-gallery.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

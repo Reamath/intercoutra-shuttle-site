@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Seat | Intercoutra</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  /* ---- Booking wizard, built on top of the site's existing tokens ---- */
+  .book-shell{max-width:720px;margin:0 auto;background:var(--white);border:1px solid var(--line-dark);border-radius:12px;overflow:hidden;box-shadow:0 20px 50px -25px rgba(0,0,0,.25);}
+  .book-topbar{padding:22px 28px 16px;border-bottom:1px solid var(--line-dark);}
+  .book-topbar-row{display:flex;align-items:center;gap:12px;}
+  .book-back{width:30px;height:30px;border-radius:50%;background:var(--gray-bg);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .book-back.show{opacity:1;pointer-events:auto;}
+  .book-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:17px;}
+  .book-step-count{margin-left:auto;font-size:12.5px;color:var(--muted);}
+  .book-progress-track{height:3px;background:var(--gray-bg-dim);border-radius:3px;margin-top:14px;overflow:hidden;}
+  .book-progress-fill{height:100%;width:20%;background:var(--red);transition:width .4s ease;}
+  .book-screens{overflow:hidden;position:relative;}
+  .book-track{display:flex;width:600%;transition:transform .45s cubic-bezier(.65,0,.35,1);}
+  .book-screen{width:16.666%;padding:26px 28px 32px;}
+  .book-eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);font-weight:700;}
+  .book-h2{font-family:'Poppins',sans-serif;font-weight:700;font-size:22px;margin:6px 0 4px;}
+  .book-sub{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
+  .book-field{margin-bottom:16px;}
+  .book-field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  .book-field input, .book-field select, .book-field textarea{width:100%;box-sizing:border-box;padding:12px 13px;border:1.5px solid var(--line-dark);border-radius:8px;font-family:'Inter',sans-serif;font-size:14.5px;background:#fff;color:var(--ink);}
+  .book-field select{
+    appearance:none;-webkit-appearance:none;-moz-appearance:none;
+    padding-right:38px;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6B6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 13px center;background-size:16px;
+  }
+  .book-field input[type="date"]::-webkit-calendar-picker-indicator{
+    filter:invert(24%) sepia(84%) saturate(1934%) hue-rotate(340deg) brightness(90%) contrast(96%);cursor:pointer;
+  }
+  .book-field input:focus, .book-field select:focus, .book-field textarea:focus{
+    outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(195,31,38,.12);
+  }
+  .book-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .book-stepper{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--line-dark);border-radius:8px;padding:6px 6px 6px 14px;}
+  .book-stepper-btn{width:32px;height:32px;border-radius:50%;background:var(--gray-bg);border:none;font-size:17px;cursor:pointer;}
+  .book-stepper-val{font-weight:600;font-size:15px;min-width:20px;text-align:center;}
+  .book-toggle{display:flex;gap:9px;}
+  .book-toggle-opt{flex:1;text-align:center;padding:11px;border:1.5px solid var(--line-dark);border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;}
+  .book-toggle-opt.selected{background:var(--red);color:#fff;border-color:var(--red);}
+  .book-route-card{background:var(--black);color:#fff;border-radius:10px;padding:18px 20px;margin-bottom:18px;}
+  .book-route-card .lbl{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--red-light);}
+  .book-depart-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .book-depart-card{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border:1.5px solid var(--line-dark);border-radius:8px;cursor:pointer;}
+  .book-depart-card.selected{border-color:var(--red);background:#FFF5F5;}
+  .book-review-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line-dark);font-size:13.5px;}
+  .book-review-row:last-child{border-bottom:none;}
+  .book-price-total{display:flex;justify-content:space-between;align-items:baseline;background:var(--gray-bg);border-radius:8px;padding:14px 16px;margin:16px 0;}
+  .book-price-total .amt{font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;}
+  .book-btn{width:100%;background:var(--black);color:#fff;border:none;padding:14px;border-radius:8px;font-family:'Poppins',sans-serif;font-weight:600;font-size:15px;cursor:pointer;margin-top:6px;}
+  .book-btn.red{background:var(--red);}
+  .book-btn:disabled{opacity:.6;cursor:not-allowed;}
+  .book-confirm{text-align:center;padding-top:6px;}
+  .book-check{width:70px;height:70px;border-radius:50%;background:#2E7D32;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+  .book-error{background:#FFF3F3;border:1px solid #F3C7C7;color:var(--red-dark);padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="index.html" class="logo">
+      <img src="images/logo-intercoutra.png" alt="Intercoutra Shuttle Services" style="height:52px;width:auto;">
+    </a>
+    <nav class="main-nav"><ul><li><a href="index.html">Home</a></li>
+<li><a href="services.html">Services</a></li>
+<li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+<li><a href="fleet.html">Fleet</a></li>
+<li><a href="about.html">About Us</a></li>
+<li><a href="contact.html">Contact</a></li>
+</ul></nav>
+    <div class="nav-cta">
+      <a href="book.html" class="btn btn-red btn-sm">Book Now →</a>
+      <div class="hamburger" onclick="toggleMobileNav()"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <ul><li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="routes-schedules.html">Routes &amp; Schedules</a></li><li><a href="fleet.html">Fleet</a></li><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li></ul>
+    <div class="mnav-cta"><a href="book.html" class="btn btn-red" style="width:100%;text-align:center;">Book Now →</a></div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">Reserve Your Seat</div>
+    <h1>Book Your Trip</h1>
+    <p>Nothing's charged yet — this holds your seat while we confirm the rest with you directly.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="book-shell">
+
+      <div class="book-topbar">
+        <div class="book-topbar-row">
+          <div class="book-back" id="bookBack" onclick="prevStep()">←</div>
+          <div class="book-title" id="bookTitle">Choose Your Trip</div>
+          <div class="book-step-count" id="bookStepCount">Step 1 of 5</div>
+        </div>
+        <div class="book-progress-track"><div class="book-progress-fill" id="bookProgressFill"></div></div>
+      </div>
+
+      <div class="book-screens">
+        <div class="book-track" id="bookTrack">
+
+          <!-- STEP 1: ROUTE -->
+          <div class="book-screen">
+            <span class="book-eyebrow">Eswatini ⇄ Johannesburg</span>
+            <h2 class="book-h2">Pick Your Departure</h2>
+            <p class="book-sub">Same route, reliable timing — pick the direction and date that works.</p>
+
+            <div class="book-field">
+              <label>Direction</label>
+              <select id="fDirection" onchange="loadDepartures()">
+                <option value="eswatini_jhb">Eswatini → Johannesburg</option>
+                <option value="jhb_eswatini">Johannesburg → Eswatini</option>
+              </select>
+            </div>
+            <div class="book-field">
+              <label>Departure Date</label>
+              <input type="date" id="fDate" onchange="loadDepartures()">
+            </div>
+
+            <div class="book-depart-list" id="departList">
+              <p style="color:var(--muted);font-size:13.5px;">Choose a direction and date to see available departures.</p>
+            </div>
+
+            <div class="book-error" id="step1Error"></div>
+            <button class="book-btn red" onclick="goStep2()">Continue</button>
+          </div>
+
+          <!-- STEP 2: TRAVELER DETAILS -->
+          <div class="book-screen">
+            <span class="book-eyebrow">Who's Traveling</span>
+            <h2 class="book-h2">Your Details</h2>
+            <p class="book-sub">So we know who to look for at pickup, and who to call if plans change.</p>
+
+            <div class="book-field">
+              <label>Full Name</label>
+              <div class="book-row2">
+                <input type="text" id="fFirstName" placeholder="First name">
+                <input type="text" id="fSurname" placeholder="Surname">
+              </div>
+            </div>
+            <div class="book-field">
+              <label>WhatsApp / Contact Number</label>
+              <input type="text" id="fPhone" placeholder="+27 82 000 0000">
+            </div>
+            <div class="book-field">
+              <label>Alternative Number (optional)</label>
+              <input type="text" id="fAltPhone" placeholder="Backup number">
+            </div>
+            <div class="book-field">
+              <label>Email (optional)</label>
+              <input type="email" id="fEmail" placeholder="you@example.com">
+            </div>
+            <div class="book-field">
+              <label>Emergency Contact Name</label>
+              <input type="text" id="fEmergName" placeholder="e.g. spouse, parent, colleague">
+            </div>
+            <div class="book-field">
+              <label>Emergency Contact Number</label>
+              <input type="text" id="fEmergPhone" placeholder="+268 76 000 0000">
+            </div>
+
+            <div class="book-error" id="step2Error"></div>
+            <button class="book-btn red" onclick="goStep3()">Continue</button>
+          </div>
+
+          <!-- STEP 3: TRIP DETAILS -->
+          <div class="book-screen">
+            <span class="book-eyebrow">Trip Details</span>
+            <h2 class="book-h2">A Few Details</h2>
+            <p class="book-sub">Helps us hold the right seats and boot space.</p>
+
+            <div class="book-field">
+              <label>Passengers</label>
+              <div class="book-stepper">
+                <span style="font-size:13.5px;color:var(--muted);">Traveling with you</span>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <button class="book-stepper-btn" onclick="stepVal('pax',-1)">−</button>
+                  <span class="book-stepper-val" id="paxVal">1</span>
+                  <button class="book-stepper-btn" onclick="stepVal('pax',1)">+</button>
+                </div>
+              </div>
+            </div>
+            <div id="passengerNamesWrap"></div>
+            <div class="book-field">
+              <label>Large Suitcases</label>
+              <div class="book-stepper">
+                <span style="font-size:13.5px;color:var(--muted);">Large bags</span>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <button class="book-stepper-btn" onclick="stepVal('bags',-1)">−</button>
+                  <span class="book-stepper-val" id="bagsVal">1</span>
+                  <button class="book-stepper-btn" onclick="stepVal('bags',1)">+</button>
+                </div>
+              </div>
+            </div>
+            <div class="book-field">
+              <label>Other Bags / Notes</label>
+              <input type="text" id="fBagNote" placeholder="e.g. hand luggage, box/parcel">
+            </div>
+            <div class="book-field">
+              <label>Book a Return?</label>
+              <div class="book-toggle">
+                <div class="book-toggle-opt selected" id="toggleNo" onclick="setReturn(false)">No</div>
+                <div class="book-toggle-opt" id="toggleYes" onclick="setReturn(true)">Yes — save R200</div>
+              </div>
+            </div>
+            <div class="book-field" id="returnDateField" style="display:none;">
+              <label>Return Date</label>
+              <input type="date" id="fReturnDate">
+              <div id="returnDepartList" style="margin-top:10px;"></div>
+            </div>
+
+            <div class="book-error" id="step3Error"></div>
+            <button class="book-btn red" onclick="goStep4()">Review Booking</button>
+          </div>
+
+          <!-- STEP 4: REVIEW -->
+          <div class="book-screen">
+            <span class="book-eyebrow">Review</span>
+            <h2 class="book-h2">Confirm the Details</h2>
+            <p class="book-sub">Nothing's charged yet — this just holds your seat.</p>
+
+            <div style="background:#fff;border:1.5px solid var(--line-dark);border-radius:10px;padding:16px;margin-bottom:16px;">
+              <div class="book-review-row"><span style="color:var(--muted);">Traveler</span><span><span id="rTraveler" style="font-weight:600;"></span> <a href="#" onclick="jumpToStep(1);return false;" style="font-size:12px;color:var(--red);margin-left:8px;">Edit</a></span></div>
+              <div class="book-review-row"><span style="color:var(--muted);">Route</span><span><span id="rRoute" style="font-weight:600;"></span> <a href="#" onclick="jumpToStep(0);return false;" style="font-size:12px;color:var(--red);margin-left:8px;">Edit</a></span></div>
+              <div class="book-review-row"><span style="color:var(--muted);">Departure</span><span><span id="rDeparture" style="font-weight:600;"></span> <a href="#" onclick="jumpToStep(0);return false;" style="font-size:12px;color:var(--red);margin-left:8px;">Edit</a></span></div>
+              <div class="book-review-row"><span style="color:var(--muted);">Passengers</span><span><span id="rPax" style="font-weight:600;"></span> <a href="#" onclick="jumpToStep(2);return false;" style="font-size:12px;color:var(--red);margin-left:8px;">Edit</a></span></div>
+              <div class="book-review-row"><span style="color:var(--muted);">Luggage</span><span><span id="rLuggage" style="font-weight:600;"></span> <a href="#" onclick="jumpToStep(2);return false;" style="font-size:12px;color:var(--red);margin-left:8px;">Edit</a></span></div>
+              <div class="book-review-row"><span style="color:var(--muted);">Return</span><span><span id="rReturn" style="font-weight:600;"></span> <a href="#" onclick="jumpToStep(2);return false;" style="font-size:12px;color:var(--red);margin-left:8px;">Edit</a></span></div>
+            </div>
+
+            <div class="book-price-total"><span style="font-weight:600;">Total Due</span><div class="amt" id="rPrice">R900</div></div>
+
+            <div class="book-error" id="step4Error"></div>
+            <button class="book-btn red" id="holdBtn" onclick="submitBooking()">Hold My Seat</button>
+          </div>
+
+          <!-- STEP 5: CONFIRMATION -->
+          <div class="book-screen">
+            <div class="book-confirm">
+              <div class="book-check"><svg width="32" height="32" viewBox="0 0 24 24"><path d="M4 12l5 6L20 6" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <h2 class="book-h2">Seat Held</h2>
+              <p style="color:var(--muted);font-size:13.5px;" id="confirmRef">Booking ref —</p>
+              <p style="font-size:13.5px;margin-top:14px;">We'll message you on WhatsApp shortly with your driver details and payment options.</p>
+              <p style="font-size:12px;color:var(--muted);font-style:italic;margin-top:10px;">📘 Reminder: this is a border crossing — bring a valid passport, even as an SA citizen.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <img src="images/logo-intercoutra-white.png" alt="Intercoutra Shuttle Services" style="height:44px;width:auto;margin-bottom:6px;display:block;">
+        <p style="font-size:11px;font-style:italic;color:#9A9A9A;margin-bottom:14px;">Driven by Excellence, Defined by Comfort</p>
+        <p style="font-size:13.5px;max-width:260px;">Providing premium shuttle services across Eswatini, South Africa and Lesotho.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+          <li><a href="fleet.html">Fleet</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="manage.html">Manage Booking</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact Us</h4>
+        <ul>
+          <li>+268 2404 3033</li>
+          <li>+268 76 3404 3833</li>
+          <li>booking@intercoutra.com</li>
+          <li>Manzini, Eswatini</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Intercoutra Shuttle Services. All rights reserved. · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy Policy (POPIA)</a> · <a href="terms.html" style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a></div>
+    <div>Licensed cross-border operator</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+/* ============================================================
+   SUPABASE CONNECTION
+   ============================================================
+   Fill these in from Settings -> API in your Supabase project.
+   The anon key is SAFE to expose in front-end code like this —
+   it's designed for it. Row Level Security (already set up in
+   the schema) is what actually protects the data.
+   ============================================================ */
+const SUPABASE_URL = "https://fqdxiwondspynpiplrjq.supabase.co";       // e.g. https://xxxxx.supabase.co
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHhpd29uZHNweW5waXBscmpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3ODY4MDEsImV4cCI6MjA5OTM2MjgwMX0.xn-SlGwsxzW7WfoU0AYKdURC_8QgI3_ILsdnDU7JLDc";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentStep = 0;
+const totalSteps = 5;
+const titles = ["Choose Your Trip","Your Details","Trip Details","Review","Confirmation"];
+let pax = 1, bags = 1, wantsReturn = false;
+let selectedTrip = null;      // the chosen outbound trip_instance row
+let selectedReturnTrip = null; // the chosen return trip_instance row, if any
+
+function updateChrome(){
+  document.getElementById('bookTrack').style.transform = `translateX(-${currentStep * (100/6)}%)`;
+  document.getElementById('bookProgressFill').style.width = `${((currentStep+1)/totalSteps)*100}%`;
+  document.getElementById('bookTitle').textContent = titles[currentStep];
+  document.getElementById('bookStepCount').textContent = `Step ${currentStep+1} of ${totalSteps}`;
+  document.getElementById('bookBack').classList.toggle('show', currentStep > 0 && currentStep < 4);
+}
+function prevStep(){ if(currentStep > 0 && currentStep < 4){ currentStep--; updateChrome(); } }
+function jumpToStep(n){ currentStep = n; updateChrome(); }
+
+function showError(id, msg){ const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
+function hideError(id){ document.getElementById(id).style.display = 'none'; }
+
+// ---------- STEP 1: load real departures from Supabase ----------
+async function loadDepartures(){
+  const direction = document.getElementById('fDirection').value;
+  const date = document.getElementById('fDate').value;
+  const listEl = document.getElementById('departList');
+  if(!date){ listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">Pick a date to see available departures.</p>'; return; }
+
+  listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">Loading...</p>';
+
+  const originLabel = direction === 'eswatini_jhb' ? 'Manzini - Riverside Mall' : 'Sandton - Gautrain Station';
+  const dayStart = new Date(date + 'T00:00:00');
+  const dayEnd = new Date(date + 'T23:59:59');
+
+  const { data: trips, error } = await sb
+    .from('trip_seat_availability')
+    .select('trip_instance_id, origin_label, destination_label, departure_at, capacity, seats_available')
+    .eq('origin_label', originLabel)
+    .gte('departure_at', dayStart.toISOString())
+    .lte('departure_at', dayEnd.toISOString())
+    .eq('status', 'scheduled')
+    .order('departure_at');
+
+  if(error){ listEl.innerHTML = `<p style="color:var(--red);font-size:13px;">Couldn't load departures: ${error.message}</p>`; return; }
+  if(!trips || trips.length === 0){ listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">No departures found for that date yet.</p>'; return; }
+
+  listEl.innerHTML = '';
+  trips.forEach(t => {
+    const time = new Date(t.departure_at).toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'});
+    const avail = t.seats_available ?? t.capacity ?? 6;
+    const card = document.createElement('div');
+    card.className = 'book-depart-card';
+    card.innerHTML = `<div><strong>${time}</strong><div style="font-size:12px;color:var(--muted);">${t.origin_label} → ${t.destination_label}</div></div><div style="font-size:12px;color:${avail>0?'#2E7D32':'#B26A00'};font-weight:600;">${avail} seat${avail===1?'':'s'} left</div>`;
+    card.onclick = () => {
+      document.querySelectorAll('#departList .book-depart-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedTrip = { id: t.trip_instance_id, origin_label: t.origin_label, destination_label: t.destination_label, departure_at: t.departure_at };
+    };
+    listEl.appendChild(card);
+  });
+}
+
+function goStep2(){
+  hideError('step1Error');
+  if(!selectedTrip){ showError('step1Error', 'Please select a departure time.'); return; }
+  currentStep = 1; updateChrome();
+}
+
+function goStep3(){
+  hideError('step2Error');
+  const first = document.getElementById('fFirstName').value.trim();
+  const surname = document.getElementById('fSurname').value.trim();
+  const phone = document.getElementById('fPhone').value.trim();
+  if(!first || !surname){ showError('step2Error', 'Please enter your full name.'); return; }
+  if(!phone){ showError('step2Error', 'Please enter a contact number.'); return; }
+  currentStep = 2; updateChrome();
+}
+
+function stepVal(which, delta){
+  if(which==='pax'){ pax = Math.max(1, Math.min(6, pax+delta)); document.getElementById('paxVal').textContent = pax; renderPassengerNameFields(); }
+  if(which==='bags'){ bags = Math.max(0, Math.min(6, bags+delta)); document.getElementById('bagsVal').textContent = bags; }
+}
+
+function renderPassengerNameFields(){
+  const wrap = document.getElementById('passengerNamesWrap');
+  wrap.innerHTML = '';
+  if(pax > 1){
+    const label = document.createElement('div');
+    label.innerHTML = '<label style="display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;font-weight:600;">Other Passenger Names <span style="text-transform:none;font-style:italic;">(kept on file in case of an accident or emergency)</span></label>';
+    wrap.appendChild(label);
+    for(let i=2;i<=pax;i++){
+      const field = document.createElement('div');
+      field.className = 'book-field';
+      field.innerHTML = `<input type="text" class="pax-name-input" placeholder="Passenger ${i} full name">`;
+      wrap.appendChild(field);
+    }
+  }
+}
+
+function collectPassengerNames(){
+  return Array.from(document.querySelectorAll('.pax-name-input')).map(i => i.value.trim()).filter(v => v);
+}
+function setReturn(val){
+  wantsReturn = val;
+  document.getElementById('toggleNo').classList.toggle('selected', !val);
+  document.getElementById('toggleYes').classList.toggle('selected', val);
+  document.getElementById('returnDateField').style.display = val ? 'block' : 'none';
+}
+
+async function loadReturnDepartures(){
+  const date = document.getElementById('fReturnDate').value;
+  if(!date) return;
+  const direction = document.getElementById('fDirection').value;
+  const returnOrigin = direction === 'eswatini_jhb' ? 'Sandton - Gautrain Station' : 'Manzini - Riverside Mall';
+  const dayStart = new Date(date + 'T00:00:00');
+  const dayEnd = new Date(date + 'T23:59:59');
+  const listEl = document.getElementById('returnDepartList');
+  listEl.innerHTML = 'Loading...';
+
+  const { data: trips, error } = await sb
+    .from('trip_seat_availability')
+    .select('trip_instance_id, origin_label, destination_label, departure_at, capacity, seats_available')
+    .eq('origin_label', returnOrigin)
+    .gte('departure_at', dayStart.toISOString())
+    .lte('departure_at', dayEnd.toISOString())
+    .eq('status', 'scheduled')
+    .order('departure_at');
+
+  if(error || !trips || trips.length === 0){ listEl.innerHTML = '<p style="font-size:12.5px;color:var(--muted);">No return departures found for that date.</p>'; return; }
+  listEl.innerHTML = '';
+  trips.forEach(t => {
+    const time = new Date(t.departure_at).toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'});
+    const card = document.createElement('div');
+    card.className = 'book-depart-card';
+    card.style.marginBottom = '6px';
+    card.innerHTML = `<strong>${time}</strong> — ${t.origin_label} → ${t.destination_label}`;
+    card.onclick = () => {
+      document.querySelectorAll('#returnDepartList .book-depart-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedReturnTrip = { id: t.trip_instance_id, origin_label: t.origin_label, destination_label: t.destination_label, departure_at: t.departure_at };
+    };
+    listEl.appendChild(card);
+  });
+}
+document.getElementById('fReturnDate').addEventListener('change', loadReturnDepartures);
+
+function goStep4(){
+  hideError('step3Error');
+  if(wantsReturn && !selectedReturnTrip){ showError('step3Error', 'Please select a return departure.'); return; }
+  if(pax > 1){
+    const names = collectPassengerNames();
+    if(names.length < pax - 1){ showError('step3Error', `Please enter names for all ${pax-1} other passenger${pax-1===1?'':'s'}.`); return; }
+  }
+
+  const first = document.getElementById('fFirstName').value.trim();
+  const surname = document.getElementById('fSurname').value.trim();
+  document.getElementById('rTraveler').textContent = `${first} ${surname}`;
+  document.getElementById('rRoute').textContent = `${selectedTrip.origin_label} → ${selectedTrip.destination_label}`;
+  document.getElementById('rDeparture').textContent = new Date(selectedTrip.departure_at).toLocaleString('en-ZA', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+  document.getElementById('rPax').textContent = pax;
+  const bagNote = document.getElementById('fBagNote').value.trim();
+  document.getElementById('rLuggage').textContent = `${bags} large bag${bags===1?'':'s'}${bagNote ? ', ' + bagNote : ''}`;
+  document.getElementById('rReturn').textContent = wantsReturn
+    ? new Date(selectedReturnTrip.departure_at).toLocaleString('en-ZA', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})
+    : 'Not booked';
+
+  const total = wantsReturn ? 1600 : 900;
+  document.getElementById('rPrice').textContent = `R${total.toLocaleString()}`;
+
+  currentStep = 3; updateChrome();
+}
+
+function genBookingRef(){
+  return 'IC-' + Math.floor(1000 + Math.random()*9000);
+}
+
+async function submitBooking(){
+  hideError('step4Error');
+  const btn = document.getElementById('holdBtn');
+  btn.disabled = true; btn.textContent = 'Holding your seat...';
+
+  try {
+    const payload = {
+      first_name: document.getElementById('fFirstName').value.trim(),
+      surname: document.getElementById('fSurname').value.trim(),
+      phone: document.getElementById('fPhone').value.trim(),
+      alt_phone: document.getElementById('fAltPhone').value.trim() || null,
+      email: document.getElementById('fEmail').value.trim() || null,
+      emergency_contact_name: document.getElementById('fEmergName').value.trim() || null,
+      emergency_contact_phone: document.getElementById('fEmergPhone').value.trim() || null,
+      trip_instance_id: selectedTrip.id,
+      return_trip_instance_id: wantsReturn ? selectedReturnTrip.id : null,
+      passengers: pax,
+      large_bags: bags,
+      other_bag_note: document.getElementById('fBagNote').value.trim() || null,
+      passenger_names: collectPassengerNames(),
+    };
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-booking`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if(!result.success) throw new Error(result.error || 'Unknown error');
+
+    document.getElementById('confirmRef').textContent = `Booking ref ${result.booking_ref} · held for 45 minutes`;
+    currentStep = 4; updateChrome();
+
+  } catch (err) {
+    showError('step4Error', 'Something went wrong holding your seat: ' + err.message + '. Please try again or message us directly on WhatsApp.');
+    btn.disabled = false; btn.textContent = 'Hold My Seat';
+  }
+}
+
+updateChrome();
+
+// If someone arrived here via the homepage Quick Booking search,
+// carry their answers straight in rather than making them re-enter
+// everything - direction, date, passengers, and return intent.
+(function applyIncomingSearch(){
+  const params = new URLSearchParams(window.location.search);
+  const incomingDirection = params.get('direction');
+  const incomingDate = params.get('date');
+  const incomingPax = params.get('pax');
+  const incomingReturn = params.get('return') === '1';
+  const incomingReturnDate = params.get('returnDate');
+
+  if(incomingDirection){ document.getElementById('fDirection').value = incomingDirection; }
+  if(incomingDate){ document.getElementById('fDate').value = incomingDate; }
+  if(incomingPax){
+    pax = Math.max(1, Math.min(6, parseInt(incomingPax, 10) || 1));
+    document.getElementById('paxVal').textContent = pax;
+  }
+  if(incomingReturn){
+    setReturn(true);
+    if(incomingReturnDate){
+      document.getElementById('fReturnDate').value = incomingReturnDate;
+      loadReturnDepartures();
+    }
+  }
+  if(incomingDirection && incomingDate){ loadDepartures(); }
+})();
+</script>
+
+</body>
+</html>

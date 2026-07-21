@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispatch | Intercoutra</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --black:#121212; --red:#C31F26; --gray-bg:#F7F7F7; --gray-bg-dim:#EFEFEF; --muted:#6B6B6B; --line:#E7E7E7; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--gray-bg);color:var(--black);min-height:100vh;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:700;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  /* login screen */
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+  .login-box{background:#fff;border-radius:12px;padding:36px;width:100%;max-width:360px;box-shadow:0 20px 50px -25px rgba(0,0,0,.3);}
+  .login-box h1{font-size:20px;margin-bottom:6px;}
+  .login-box p{color:var(--muted);font-size:13.5px;margin-bottom:20px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  .field input, .field select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;}
+  .btn{background:var(--red);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Poppins',sans-serif;font-weight:600;font-size:14.5px;cursor:pointer;width:100%;}
+  .btn:disabled{opacity:.6;}
+  .err{background:#FFF3F3;border:1px solid #F3C7C7;color:#9E191F;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
+
+  /* dashboard */
+  #dashboard{display:none;}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:16px 28px;display:flex;justify-content:space-between;align-items:center;}
+  header h1{font-size:17px;}
+  .logout{background:none;border:1px solid var(--line);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--muted);}
+  .tabs{display:flex;gap:6px;padding:16px 28px 0;background:#fff;border-bottom:1px solid var(--line);}
+  .tab{padding:10px 18px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
+  .tab.active{color:var(--black);border-bottom-color:var(--red);}
+  .panel{display:none;padding:24px 28px;}
+  .panel.active{display:block;}
+  .toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .toolbar input, .toolbar select{padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px;}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line);background:var(--gray-bg-dim);}
+  td{padding:11px 14px;font-size:13.5px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .status-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;}
+  .status-pill.confirmed, .status-pill.pending_hold{background:#E8F5E9;color:#2E7D32;}
+  .status-pill.cancelled{background:#F0F0F0;color:#777;}
+  .status-pill.completed{background:#E3F2FD;color:#1565C0;}
+  select.assign{padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line);}
+  .empty{color:var(--muted);font-size:13.5px;padding:20px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Intercoutra Dispatch</h1>
+    <p>Staff login - bookings, trips, and client records.</p>
+    <div class="err" id="loginErr"></div>
+    <div class="field"><label>Email</label><input type="email" id="loginEmail"></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPass"></div>
+    <button class="btn" id="loginBtn" onclick="doLogin()">Log In</button>
+  </div>
+</div>
+
+<div id="dashboard">
+  <header>
+    <h1>Intercoutra Dispatch</h1>
+    <button class="logout" onclick="doLogout()">Log Out</button>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="bookings" onclick="switchTab('bookings')">Bookings</div>
+    <div class="tab" data-tab="trips" onclick="switchTab('trips')">Upcoming Trips</div>
+    <div class="tab" data-tab="clients" onclick="switchTab('clients')">Clients</div>
+  </div>
+
+  <div class="panel active" id="panel-bookings">
+    <div class="toolbar">
+      <input type="text" id="bookingSearch" placeholder="Search ref or traveler name..." style="min-width:240px;" oninput="renderBookings()">
+      <select id="bookingStatusFilter" onchange="renderBookings()">
+        <option value="">All statuses</option>
+        <option value="pending_hold">Pending Hold</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button class="btn" onclick="exportBookingsCSV()" style="margin-left:auto;width:auto;padding:10px 18px;font-size:13px;">⬇ Download CSV</button>
+    </div>
+    <table>
+      <thead><tr><th>Ref</th><th>Traveler</th><th>Phone</th><th>Route</th><th>Departure</th><th>Pax</th><th>Luggage</th><th>Fare</th><th>Status</th></tr></thead>
+      <tbody id="bookingsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="panel-trips">
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Assign a driver and vehicle to each upcoming departure - done per trip, not fixed to a route.</p>
+    <table>
+      <thead><tr><th>Departure</th><th>Route</th><th>Seats</th><th>Driver</th><th>Vehicle</th></tr></thead>
+      <tbody id="tripsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="panel-clients">
+    <div class="toolbar">
+      <input type="text" id="clientSearch" placeholder="Search name or phone..." style="min-width:240px;" oninput="renderClients()">
+      <button class="btn" onclick="exportClientsCSV()" style="margin-left:auto;width:auto;padding:10px 18px;font-size:13px;">⬇ Download CSV</button>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Emergency Contact</th><th>Marketing Consent</th></tr></thead>
+      <tbody id="clientsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// Same project as book.html / manage.html - Settings -> API in Supabase.
+const SUPABASE_URL = "https://fqdxiwondspynpiplrjq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHhpd29uZHNweW5waXBscmpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3ODY4MDEsImV4cCI6MjA5OTM2MjgwMX0.xn-SlGwsxzW7WfoU0AYKdURC_8QgI3_ILsdnDU7JLDc";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allBookings = [], allClients = [], allTrips = [], allDrivers = [], allVehicles = [];
+
+async function doLogin(){
+  const errEl = document.getElementById('loginErr');
+  errEl.style.display = 'none';
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Log In';
+
+  if(error){ errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+  showDashboard();
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+}
+
+async function showDashboard(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  await Promise.all([loadBookings(), loadTrips(), loadClients(), loadDriversAndVehicles()]);
+}
+
+async function loadBookings(){
+  const { data, error } = await sb
+    .from('bookings')
+    .select('booking_ref, status, passengers, large_bags, other_bag_note, fare_amount, created_at, confirmed_at, hold_expires_at, return_group_id, clients(first_name, surname, phone, alt_phone, email, emergency_contact_name, emergency_contact_phone, marketing_consent), trip_instances(origin_label, destination_label, departure_at), booking_passengers(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if(error){ console.error(error); return; }
+  allBookings = data || [];
+  renderBookings();
+}
+
+function renderBookings(){
+  const search = document.getElementById('bookingSearch').value.trim().toLowerCase();
+  const statusFilter = document.getElementById('bookingStatusFilter').value;
+  const body = document.getElementById('bookingsBody');
+
+  const filtered = allBookings.filter(b => {
+    const traveler = b.clients ? `${b.clients.first_name} ${b.clients.surname}`.toLowerCase() : '';
+    const matchesSearch = !search || b.booking_ref.toLowerCase().includes(search) || traveler.includes(search);
+    const matchesStatus = !statusFilter || b.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  if(filtered.length === 0){ body.innerHTML = '<tr><td colspan="9" class="empty">No bookings match.</td></tr>'; return; }
+
+  body.innerHTML = filtered.map(b => `
+    <tr>
+      <td class="mono">${b.booking_ref}</td>
+      <td>${b.clients ? b.clients.first_name + ' ' + b.clients.surname : '—'}</td>
+      <td class="mono">${b.clients ? b.clients.phone : '—'}</td>
+      <td>${b.trip_instances ? b.trip_instances.origin_label + ' → ' + b.trip_instances.destination_label : '—'}</td>
+      <td>${b.trip_instances ? new Date(b.trip_instances.departure_at).toLocaleString('en-ZA', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '—'}</td>
+      <td>${b.passengers}</td>
+      <td>${b.large_bags} large${b.other_bag_note ? ', ' + b.other_bag_note : ''}</td>
+      <td class="mono">R${b.fare_amount}</td>
+      <td><span class="status-pill ${b.status}">${b.status.replace('_',' ')}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ---------- CSV export helpers ----------
+function csvEscape(val){
+  if(val === null || val === undefined) return '';
+  const s = String(val);
+  if(s.includes(',') || s.includes('"') || s.includes('\n')){
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function downloadCSV(filename, rows){
+  const csvContent = rows.map(row => row.map(csvEscape).join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportBookingsCSV(){
+  // Exports whatever the current search/status filter is showing - not
+  // silently everything - so what you see is what you get.
+  const search = document.getElementById('bookingSearch').value.trim().toLowerCase();
+  const statusFilter = document.getElementById('bookingStatusFilter').value;
+  const filtered = allBookings.filter(b => {
+    const traveler = b.clients ? `${b.clients.first_name} ${b.clients.surname}`.toLowerCase() : '';
+    const matchesSearch = !search || b.booking_ref.toLowerCase().includes(search) || traveler.includes(search);
+    const matchesStatus = !statusFilter || b.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const header = [
+    'Booking Ref','Status','Created','Confirmed At','Hold Expires','Return Group',
+    'First Name','Surname','Phone','Alt Phone','Email',
+    'Emergency Contact Name','Emergency Contact Phone','Marketing Consent',
+    'Route Origin','Route Destination','Departure',
+    'Passengers','Other Passenger Names','Large Bags','Other Bag Note','Fare (ZAR)'
+  ];
+
+  const rows = filtered.map(b => [
+    b.booking_ref, b.status,
+    b.created_at ? new Date(b.created_at).toLocaleString('en-ZA') : '',
+    b.confirmed_at ? new Date(b.confirmed_at).toLocaleString('en-ZA') : '',
+    b.hold_expires_at ? new Date(b.hold_expires_at).toLocaleString('en-ZA') : '',
+    b.return_group_id || '',
+    b.clients?.first_name || '', b.clients?.surname || '', b.clients?.phone || '',
+    b.clients?.alt_phone || '', b.clients?.email || '',
+    b.clients?.emergency_contact_name || '', b.clients?.emergency_contact_phone || '',
+    b.clients?.marketing_consent ? 'Yes' : 'No',
+    b.trip_instances?.origin_label || '', b.trip_instances?.destination_label || '',
+    b.trip_instances ? new Date(b.trip_instances.departure_at).toLocaleString('en-ZA') : '',
+    b.passengers,
+    (b.booking_passengers || []).map(p => p.full_name).join('; '),
+    b.large_bags, b.other_bag_note || '', b.fare_amount
+  ]);
+
+  downloadCSV(`intercoutra-bookings-${new Date().toISOString().slice(0,10)}.csv`, [header, ...rows]);
+}
+
+function exportClientsCSV(){
+  const search = document.getElementById('clientSearch').value.trim().toLowerCase();
+  const filtered = allClients.filter(c => {
+    const name = `${c.first_name} ${c.surname}`.toLowerCase();
+    return !search || name.includes(search) || (c.phone || '').includes(search);
+  });
+
+  const header = ['First Name','Surname','Phone','Alt Phone','Email','Emergency Contact Name','Emergency Contact Phone','Marketing Consent'];
+  const rows = filtered.map(c => [
+    c.first_name, c.surname, c.phone, c.alt_phone || '', c.email || '',
+    c.emergency_contact_name || '', c.emergency_contact_phone || '',
+    c.marketing_consent ? 'Yes' : 'No'
+  ]);
+
+  downloadCSV(`intercoutra-clients-${new Date().toISOString().slice(0,10)}.csv`, [header, ...rows]);
+}
+
+async function loadDriversAndVehicles(){
+  const [d, v] = await Promise.all([
+    sb.from('drivers').select('id, name').eq('active', true),
+    sb.from('vehicles').select('id, label').eq('active', true)
+  ]);
+  allDrivers = d.data || [];
+  allVehicles = v.data || [];
+}
+
+async function loadTrips(){
+  const now = new Date().toISOString();
+  const twoWeeks = new Date(Date.now() + 14*24*60*60*1000).toISOString();
+  const { data, error } = await sb
+    .from('trip_instances')
+    .select('id, origin_label, destination_label, departure_at, driver_id, vehicle_id, trip_seat_availability(seats_available, capacity)')
+    .gte('departure_at', now)
+    .lte('departure_at', twoWeeks)
+    .eq('status', 'scheduled')
+    .order('departure_at')
+    .limit(100);
+  if(error){ console.error(error); return; }
+  allTrips = data || [];
+  renderTrips();
+}
+
+function renderTrips(){
+  const body = document.getElementById('tripsBody');
+  if(allTrips.length === 0){ body.innerHTML = '<tr><td colspan="5" class="empty">No upcoming trips in the next 14 days.</td></tr>'; return; }
+
+  const driverOptions = (selected) => '<option value="">— unassigned —</option>' +
+    allDrivers.map(d => `<option value="${d.id}" ${d.id===selected?'selected':''}>${d.name}</option>`).join('');
+  const vehicleOptions = (selected) => '<option value="">— unassigned —</option>' +
+    allVehicles.map(v => `<option value="${v.id}" ${v.id===selected?'selected':''}>${v.label}</option>`).join('');
+
+  body.innerHTML = allTrips.map(t => {
+    const avail = t.trip_seat_availability?.[0]?.seats_available ?? t.capacity;
+    return `
+    <tr>
+      <td>${new Date(t.departure_at).toLocaleString('en-ZA', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</td>
+      <td>${t.origin_label} → ${t.destination_label}</td>
+      <td>${avail}</td>
+      <td><select class="assign" onchange="assignDriver('${t.id}', this.value)">${driverOptions(t.driver_id)}</select></td>
+      <td><select class="assign" onchange="assignVehicle('${t.id}', this.value)">${vehicleOptions(t.vehicle_id)}</select></td>
+    </tr>`;
+  }).join('');
+}
+
+async function assignDriver(tripId, driverId){
+  await sb.from('trip_instances').update({ driver_id: driverId || null }).eq('id', tripId);
+}
+async function assignVehicle(tripId, vehicleId){
+  await sb.from('trip_instances').update({ vehicle_id: vehicleId || null }).eq('id', tripId);
+}
+
+async function loadClients(){
+  const { data, error } = await sb
+    .from('clients')
+    .select('first_name, surname, phone, alt_phone, email, emergency_contact_name, emergency_contact_phone, marketing_consent')
+    .order('created_at', { ascending: false })
+    .limit(300);
+  if(error){ console.error(error); return; }
+  allClients = data || [];
+  renderClients();
+}
+
+function renderClients(){
+  const search = document.getElementById('clientSearch').value.trim().toLowerCase();
+  const body = document.getElementById('clientsBody');
+  const filtered = allClients.filter(c => {
+    const name = `${c.first_name} ${c.surname}`.toLowerCase();
+    return !search || name.includes(search) || (c.phone || '').includes(search);
+  });
+  if(filtered.length === 0){ body.innerHTML = '<tr><td colspan="5" class="empty">No clients match.</td></tr>'; return; }
+  body.innerHTML = filtered.map(c => `
+    <tr>
+      <td>${c.first_name} ${c.surname}</td>
+      <td class="mono">${c.phone}</td>
+      <td>${c.email || '—'}</td>
+      <td>${c.emergency_contact_name ? c.emergency_contact_name + ' (' + c.emergency_contact_phone + ')' : '—'}</td>
+      <td>${c.marketing_consent ? 'Yes' : 'No'}</td>
+    </tr>
+  `).join('');
+}
+
+// Stay logged in across refreshes if there's already a valid session
+(async function checkExistingSession(){
+  const { data } = await sb.auth.getSession();
+  if(data.session){ showDashboard(); }
+})();
+</script>
+
+</body>
+</html>

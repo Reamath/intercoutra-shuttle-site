@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Your Booking | Intercoutra</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .mb-shell{max-width:640px;margin:0 auto;background:var(--white);border:1px solid var(--line-dark);border-radius:12px;padding:32px;box-shadow:0 20px 50px -25px rgba(0,0,0,.25);}
+  .mb-field{margin-bottom:16px;}
+  .mb-field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  .mb-field input{width:100%;padding:12px 13px;border:1.5px solid var(--line-dark);border-radius:8px;font-family:'Inter',sans-serif;font-size:14.5px;}
+  .mb-btn{width:100%;background:var(--red);color:#fff;border:none;padding:13px;border-radius:8px;font-family:'Poppins',sans-serif;font-weight:600;font-size:15px;cursor:pointer;}
+  .mb-btn:disabled{opacity:.6;cursor:not-allowed;}
+  .mb-btn.secondary{background:var(--black);}
+  .mb-btn.wa{background:#25D366;margin-top:10px;}
+  .mb-error{background:#FFF3F3;border:1px solid #F3C7C7;color:var(--red-dark);padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+  .mb-result{display:none;}
+  .mb-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line-dark);font-size:13.5px;}
+  .mb-row:last-child{border-bottom:none;}
+  .mb-row .k{color:var(--muted);}
+  .mb-row .v{font-weight:600;color:var(--ink);}
+  .mb-status{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:700;text-transform:uppercase;}
+  .mb-status.confirmed, .mb-status.pending_hold{background:#E8F5E9;color:#2E7D32;}
+  .mb-status.cancelled{background:#F0F0F0;color:#777;}
+  .mb-status.completed{background:#E3F2FD;color:#1565C0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="index.html" class="logo">
+      <img src="images/logo-intercoutra.png" alt="Intercoutra Shuttle Services" style="height:52px;width:auto;">
+    </a>
+    <nav class="main-nav"><ul><li><a href="index.html">Home</a></li>
+<li><a href="services.html">Services</a></li>
+<li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+<li><a href="fleet.html">Fleet</a></li>
+<li><a href="about.html">About Us</a></li>
+<li><a href="contact.html">Contact</a></li>
+</ul></nav>
+    <div class="nav-cta">
+      <a href="book.html" class="btn btn-red btn-sm">Book Now →</a>
+      <div class="hamburger" onclick="toggleMobileNav()"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <ul><li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="routes-schedules.html">Routes &amp; Schedules</a></li><li><a href="fleet.html">Fleet</a></li><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li></ul>
+    <div class="mnav-cta"><a href="book.html" class="btn btn-red" style="width:100%;text-align:center;">Book Now →</a></div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">Manage Booking</div>
+    <h1>Find Your Trip</h1>
+    <p>Enter your booking reference and the contact number you booked with.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="mb-shell">
+
+      <div id="mbLookup">
+        <div class="mb-field">
+          <label>Booking Reference</label>
+          <input type="text" id="mbRef" placeholder="e.g. IC-4821">
+        </div>
+        <div class="mb-field">
+          <label>Contact Number Used to Book</label>
+          <input type="text" id="mbPhone" placeholder="+27 82 000 0000">
+        </div>
+        <div class="mb-error" id="mbError"></div>
+        <button class="mb-btn" id="mbLookupBtn" onclick="doLookup()">Find My Booking</button>
+      </div>
+
+      <div class="mb-result" id="mbResult">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="font-family:'Poppins',sans-serif;font-size:20px;" id="mbResultRef"></h2>
+          <span class="mb-status" id="mbResultStatus"></span>
+        </div>
+        <div class="mb-row"><span class="k">Traveler</span><span class="v" id="mbTraveler"></span></div>
+        <div class="mb-row"><span class="k">Route</span><span class="v" id="mbRoute"></span></div>
+        <div class="mb-row"><span class="k">Departure</span><span class="v" id="mbDeparture"></span></div>
+        <div class="mb-row"><span class="k">Passengers</span><span class="v" id="mbPax"></span></div>
+        <div class="mb-row"><span class="k">Luggage</span><span class="v" id="mbLuggage"></span></div>
+        <div class="mb-row"><span class="k">Fare</span><span class="v" id="mbFare"></span></div>
+
+        <div id="mbActions" style="margin-top:22px;">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Need to cancel this booking, or change your date or time? Contact us directly and we'll sort it out:</p>
+          <button class="mb-btn wa" onclick="requestChange()">Message Us on WhatsApp →</button>
+          <a href="tel:+2687634043833" style="display:block;text-align:center;margin-top:10px;padding:13px;border:1.5px solid var(--line-dark);border-radius:8px;font-weight:600;font-size:14px;color:var(--ink);">Or call +268 76 3404 3833</a>
+        </div>
+
+        <button class="mb-btn secondary" style="margin-top:16px;background:var(--gray-bg-dim);color:var(--muted);" onclick="resetLookup()">Search a Different Booking</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <img src="images/logo-intercoutra-white.png" alt="Intercoutra Shuttle Services" style="height:44px;width:auto;margin-bottom:6px;display:block;">
+        <p style="font-size:11px;font-style:italic;color:#9A9A9A;margin-bottom:14px;">Driven by Excellence, Defined by Comfort</p>
+        <p style="font-size:13.5px;max-width:260px;">Providing premium shuttle services across Eswatini, South Africa and Lesotho.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+          <li><a href="fleet.html">Fleet</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="manage.html">Manage Booking</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact Us</h4>
+        <ul>
+          <li>+268 2404 3033</li>
+          <li>+268 76 3404 3833</li>
+          <li>booking@intercoutra.com</li>
+          <li>Manzini, Eswatini</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Intercoutra Shuttle Services. All rights reserved. · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy Policy (POPIA)</a> · <a href="terms.html" style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a></div>
+    <div>Licensed cross-border operator</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+// Fill these in exactly like book.html - Settings -> API in Supabase.
+const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE";
+const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+const WHATSAPP_NUMBER = '2687634043833'; // same number confirmed for the other-services enquiry flow
+
+let currentBooking = null;
+
+async function doLookup(){
+  const errEl = document.getElementById('mbError');
+  errEl.style.display = 'none';
+  const ref = document.getElementById('mbRef').value.trim();
+  const phone = document.getElementById('mbPhone').value.trim();
+
+  if(!ref || !phone){
+    errEl.textContent = 'Please enter both your booking reference and contact number.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('mbLookupBtn');
+  btn.disabled = true; btn.textContent = 'Searching...';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/lookup-booking`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ booking_ref: ref, phone })
+    });
+    const result = await res.json();
+    if(!result.success){ throw new Error(result.error || 'Booking not found.'); }
+
+    currentBooking = result.booking;
+    renderBooking(currentBooking);
+    document.getElementById('mbLookup').style.display = 'none';
+    document.getElementById('mbResult').style.display = 'block';
+
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Find My Booking';
+  }
+}
+
+function renderBooking(b){
+  document.getElementById('mbResultRef').textContent = b.ref;
+  const statusEl = document.getElementById('mbResultStatus');
+  statusEl.textContent = b.status.replace('_', ' ');
+  statusEl.className = 'mb-status ' + b.status;
+  document.getElementById('mbTraveler').textContent = b.traveler;
+  document.getElementById('mbRoute').textContent = b.route + (b.is_return_leg ? ' (return leg)' : '');
+  document.getElementById('mbDeparture').textContent = b.departure ? new Date(b.departure).toLocaleString('en-ZA', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+  document.getElementById('mbPax').textContent = b.passengers;
+  document.getElementById('mbLuggage').textContent = `${b.large_bags} large bag${b.large_bags === 1 ? '' : 's'}${b.other_bag_note ? ', ' + b.other_bag_note : ''}`;
+  document.getElementById('mbFare').textContent = `R${b.fare}`;
+
+  const canAct = (b.status === 'pending_hold' || b.status === 'confirmed');
+  document.getElementById('mbActions').style.display = canAct ? 'block' : 'none';
+}
+
+function requestChange(){
+  const msg = `Hi Intercoutra, I need to cancel or change my booking ${currentBooking.ref} (${currentBooking.route}).`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function resetLookup(){
+  document.getElementById('mbLookup').style.display = 'block';
+  document.getElementById('mbResult').style.display = 'none';
+  document.getElementById('mbRef').value = '';
+  document.getElementById('mbPhone').value = '';
+  currentBooking = null;
+}
+</script>
+
+</body>
+</html>
