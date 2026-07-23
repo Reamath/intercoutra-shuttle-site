@@ -56,6 +56,7 @@
   .book-depart-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
   .book-depart-card{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border:1.5px solid var(--line-dark);border-radius:8px;cursor:pointer;}
   .book-depart-card.selected{border-color:var(--red);background:#FFF5F5;}
+  .book-depart-hint{font-size:12px;color:var(--muted);margin:0 0 8px;font-weight:600;}
   .book-review-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line-dark);font-size:13.5px;}
   .book-review-row:last-child{border-bottom:none;}
   .book-price-total{display:flex;justify-content:space-between;align-items:baseline;background:var(--gray-bg);border-radius:8px;padding:14px 16px;margin:16px 0;}
@@ -354,7 +355,7 @@ async function loadDepartures(){
   const listEl = document.getElementById('departList');
   if(!date){ listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">Pick a date to see available departures.</p>'; return; }
 
-  listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">Loading...</p>';
+  listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">Finding your available seats...</p>';
 
   const originLabel = direction === 'eswatini_jhb' ? 'Manzini - Riverside Mall' : 'Sandton - Gautrain Station';
   const dayStart = new Date(date + 'T00:00:00');
@@ -372,7 +373,7 @@ async function loadDepartures(){
   if(error){ listEl.innerHTML = `<p style="color:var(--red);font-size:13px;">Couldn't load departures: ${error.message}</p>`; return; }
   if(!trips || trips.length === 0){ listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">No departures found for that date yet.</p>'; return; }
 
-  listEl.innerHTML = '';
+  listEl.innerHTML = '<p class="book-depart-hint">Tap a departure below to select it:</p>';
   trips.forEach(t => {
     const time = new Date(t.departure_at).toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'});
     const avail = t.seats_available ?? t.capacity ?? 6;
@@ -443,7 +444,7 @@ async function loadReturnDepartures(){
   const dayStart = new Date(date + 'T00:00:00');
   const dayEnd = new Date(date + 'T23:59:59');
   const listEl = document.getElementById('returnDepartList');
-  listEl.innerHTML = 'Loading...';
+  listEl.innerHTML = '<p style="color:var(--muted);font-size:13.5px;">Finding available return departures...</p>';
 
   const { data: trips, error } = await sb
     .from('trip_seat_availability')
@@ -455,7 +456,7 @@ async function loadReturnDepartures(){
     .order('departure_at');
 
   if(error || !trips || trips.length === 0){ listEl.innerHTML = '<p style="font-size:12.5px;color:var(--muted);">No return departures found for that date.</p>'; return; }
-  listEl.innerHTML = '';
+  listEl.innerHTML = '<p class="book-depart-hint">Tap a departure below to select it:</p>';
   trips.forEach(t => {
     const time = new Date(t.departure_at).toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'});
     const card = document.createElement('div');
