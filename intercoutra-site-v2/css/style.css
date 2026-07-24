@@ -16,6 +16,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
+#services, #about{scroll-margin-top:90px;}
 body{
   font-family:'Inter',sans-serif;
   background:var(--gray-bg);
