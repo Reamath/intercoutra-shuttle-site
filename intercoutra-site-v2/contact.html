@@ -53,12 +53,11 @@
         <h2 style="font-size:20px;margin-bottom:18px;">Request a Booking</h2>
         <div class="form-field"><label>Full Name</label><input type="text" id="ctName" placeholder="Your full name"></div>
         <div class="form-field"><label>Email</label><input type="email" id="ctEmail" placeholder="you@email.com"></div>
-        <div class="form-field"><label>Contact Number</label><input type="tel" id="ctPhone" placeholder="+268 ..."></div>
+        <div class="form-field"><label>Contact Number</label><input type="tel" id="ctPhone" placeholder="+27 82 000 0000"></div>
         <div class="form-field"><label>Route</label>
           <select id="ctRoute">
             <option>Eswatini → Johannesburg</option>
             <option>Johannesburg → Eswatini</option>
-            <option>Lesotho ↔ Johannesburg</option>
           </select>
         </div>
         <div class="form-field"><label>Departure Date</label><input type="date" id="ctDate"></div>
@@ -78,12 +77,12 @@
       <div>
         <div class="contact-card" style="margin-bottom:16px;">
           <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M5.5 4h3.2l1.6 4-2 1.3a11.5 11.5 0 0 0 5.4 5.4l1.3-2 4 1.6v3.2a1.6 1.6 0 0 1-1.7 1.6A16 16 0 0 1 3.9 5.7 1.6 1.6 0 0 1 5.5 4z"/></svg>Phone</h3>
-          <p>+268 2404 3033</p>
-          <p>+268 76 3404 3833</p>
+          <p>+27 74 351 8384</p>
+          <p>+27 66 286 9427</p>
         </div>
         <div class="contact-card" style="margin-bottom:16px;">
           <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M3 6.5l9 6.5 9-6.5"/></svg>Email</h3>
-          <p>booking@intercoutra.com</p>
+          <p>bookings@intercoutra.co.za</p>
         </div>
         <div class="contact-card" style="margin-bottom:16px;">
           <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>Location</h3>
@@ -105,7 +104,7 @@
       <div>
         <img src="images/logo-intercoutra-white.png" alt="Intercoutra Shuttle Services" style="height:44px;width:auto;margin-bottom:6px;display:block;">
         <p style="font-size:11px;font-style:italic;color:#9A9A9A;margin-bottom:14px;">Driven by Excellence, Defined by Comfort</p>
-        <p style="font-size:13.5px;max-width:260px;">Providing premium shuttle services across Eswatini, South Africa and Lesotho.</p>
+        <p style="font-size:13.5px;max-width:260px;">Providing premium shuttle services across Eswatini and South Africa.</p>
       </div>
       <div>
         <h4>Quick Links</h4>
@@ -122,9 +121,9 @@
       <div>
         <h4>Contact Us</h4>
         <ul>
-          <li>+268 2404 3033</li>
-          <li>+268 76 3404 3833</li>
-          <li>booking@intercoutra.com</li>
+          <li>+27 74 351 8384</li>
+          <li>+27 66 286 9427</li>
+          <li>bookings@intercoutra.co.za</li>
           <li>Manzini, Eswatini</li>
         </ul>
       </div>
@@ -161,6 +160,7 @@
 
     if(!name){ errEl.textContent = 'Please enter your full name.'; errEl.style.display = 'block'; return; }
     if(!phone){ errEl.textContent = 'Please enter a contact number.'; errEl.style.display = 'block'; return; }
+    if(!phone.startsWith('+')){ errEl.textContent = 'Please include your country code, e.g. +27 82 000 0000.'; errEl.style.display = 'block'; return; }
     if(!date){ errEl.textContent = 'Please choose a departure date.'; errEl.style.display = 'block'; return; }
     if(!consent){ errEl.textContent = 'Please confirm you agree to the Privacy Policy to continue.'; errEl.style.display = 'block'; return; }
 

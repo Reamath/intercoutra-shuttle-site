@@ -42,21 +42,17 @@
   <div class="bg" style="background-image:linear-gradient(90deg, rgba(10,10,10,.93) 32%, rgba(10,10,10,.25) 78%), url('images/Hero Merc Van.png'); background-size:cover; background-position:center;"></div>
   <div class="home-hero-inner">
     <h1>A Named Driver.<br><span class="accent">A Reserved Seat.</span></h1>
-    <p class="lede">Daily shared shuttle between Eswatini and Johannesburg — fixed departures, a driver confirmed before you travel, and a seat waiting exactly when you arrive.</p>
+    <p class="lede">Daily shared shuttle between Johannesburg and Eswatini — fixed departures, your seat reserved the moment you book, and your driver's details sent ahead of departure.</p>
     <div class="hero-badges">
       <div class="hero-badge"><span class="ic">●</span> Always On Time</div>
       <div class="hero-badge"><span class="ic">●</span> Comfort &amp; Safety</div>
       <div class="hero-badge"><span class="ic">●</span> 24/7 Support</div>
     </div>
-    <div class="hero-actions">
-      <a href="book.html" class="btn btn-red">Book Your Trip →</a>
-      <a href="routes-schedules.html" class="btn btn-outline">View Schedules</a>
-    </div>
 
     <div class="booker">
       <div class="service-tabs">
         <div class="service-tab active" data-service="shared" onclick="switchServiceTab('shared')"><svg class="tab-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="11" rx="2"/><path d="M3 13h18"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg> Shared Shuttle</div>
-        <div class="service-tab" data-service="airport" onclick="switchServiceTab('airport')"><svg class="tab-ic" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="2,13 22,4 15,13 22,22 2,13"/></svg> Airport Transfer</div>
+        <div class="service-tab" data-service="airport" onclick="switchServiceTab('airport')"><svg class="tab-ic" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg> Airport Transfer</div>
         <div class="service-tab" data-service="charter" onclick="switchServiceTab('charter')"><svg class="tab-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11 6.5 6.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><rect x="2.5" y="11" width="19" height="6.5" rx="2"/><circle cx="7" cy="19.5" r="1.8"/><circle cx="17" cy="19.5" r="1.8"/></svg> Charter Service</div>
         <div class="service-tab" data-service="executive" onclick="switchServiceTab('executive')"><svg class="tab-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="10" rx="1.5"/><path d="M9 9V6.5A1.5 1.5 0 0 1 10.5 5h3A1.5 1.5 0 0 1 15 6.5V9"/><line x1="3" y1="13.5" x2="9" y2="13.5"/><line x1="15" y1="13.5" x2="21" y2="13.5"/></svg> Executive Service</div>
       </div>
@@ -79,9 +75,9 @@
         <div class="field" id="returnDateField" style="display:none;"><label>Return Date</label><input type="date" id="qbReturnDate"></div>
         <div class="field"><label>Passengers</label><select id="qbPax"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       </div>
-      <div id="returnNote" style="display:none;margin-top:12px;font-size:12.5px;color:var(--red);font-weight:600;">✓ Return leg R700 — save R200 vs. two one-way fares</div>
-      <div class="qb-error" id="qbError" style="display:none;margin-top:12px;font-size:12.5px;color:var(--red);"></div>
-      <div style="margin-top:16px;">
+      <div id="returnNote" style="display:none;margin-top:10px;font-size:12.5px;color:var(--red);font-weight:600;">✓ Return leg R700 — save R200 vs. two one-way fares</div>
+      <div class="qb-error" id="qbError" style="display:none;margin-top:10px;font-size:12.5px;color:var(--red);"></div>
+      <div style="margin-top:10px;">
         <button class="btn btn-red btn-search" onclick="submitQuickBooking()">Search Trips</button>
       </div>
       </div>
@@ -157,6 +153,7 @@
 
     if(!name){ errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
     if(!phone){ errEl.textContent = 'Please enter a contact number.'; errEl.style.display = 'block'; return; }
+    if(!phone.startsWith('+')){ errEl.textContent = 'Please include your country code, e.g. +27 82 000 0000.'; errEl.style.display = 'block'; return; }
     if(!date){ errEl.textContent = 'Please choose a preferred date.'; errEl.style.display = 'block'; return; }
 
     const message =
@@ -207,12 +204,12 @@
       <div class="card most-popular">
         <span class="most-popular-tag">Most Popular</span>
         <h3>Shared Shuttle</h3>
-        <p>Affordable daily shared departures between Eswatini and Johannesburg, with fixed pick-up points and published schedules.</p>
+        <p>Affordable daily shared departures between Johannesburg and Eswatini, with fixed pick-up points and published schedules.</p>
         <a href="routes-schedules.html" class="link">View schedule →</a>
       </div>
       <div class="card">
         <h3>Airport Transfers</h3>
-        <p>Reliable, first-class door-to-door transfers to and from OR Tambo, King Mswati III and Moshoeshoe I airports. Flight tracking included so we're always there when you land.</p>
+        <p>Reliable, first-class door-to-door transfers to and from OR Tambo, King Shaka and Cape Town International airports. Flight tracking included so we're always there when you land.</p>
         <a href="contact.html" class="link">Book this service →</a>
       </div>
       <div class="card">
@@ -238,25 +235,13 @@
       </div>
       <a href="routes-schedules.html" class="link" style="color:var(--red);font-weight:600;font-size:14px;">View all routes →</a>
     </div>
-    <div class="route-cards">
-      <div class="route-card">
-        <div class="info">
-          <div>
-            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Eswatini</div>
-            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Johannesburg</div>
-            <div class="route-meta"><svg class="time-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Daily Shuttle</div>
-          </div>
-          <div class="route-foot"><div class="fare">From R900<span>per person one-way</span></div></div>
-          <a href="routes-schedules.html" class="btn btn-red btn-sm" style="margin-top:12px;">View Schedule</a>
-        </div>
-        <div class="photo" style="background-image:url('images/about-photo-1.jpeg');"></div>
-      </div>
+    <div class="route-cards" style="grid-template-columns:1fr 1fr;">
       <div class="route-card">
         <div class="info">
           <div>
             <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Johannesburg</div>
             <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Eswatini</div>
-            <div class="route-meta"><svg class="time-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Daily Shuttle</div>
+            <div class="route-meta"><svg class="time-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Daily Shuttle, Both Directions</div>
           </div>
           <div class="route-foot"><div class="fare">From R900<span>per person one-way</span></div></div>
           <a href="routes-schedules.html" class="btn btn-red btn-sm" style="margin-top:12px;">View Schedule</a>
@@ -266,12 +251,11 @@
       <div class="route-card">
         <div class="info">
           <div>
-            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Lesotho</div>
-            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Johannesburg</div>
-            <div class="route-meta"><svg class="time-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Daily Shuttle</div>
+            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Airport Transfers</div>
+            <div class="route-meta">OR Tambo · King Shaka · Cape Town International</div>
           </div>
-          <div class="route-foot"><div class="fare">From R800<span>per person</span></div></div>
-          <a href="routes-schedules.html" class="btn btn-red btn-sm" style="margin-top:12px;">View Schedule</a>
+          <div class="route-foot"><div class="fare">Get a Quote<span>door-to-door, on request</span></div></div>
+          <a href="contact.html" class="btn btn-red btn-sm" style="margin-top:12px;">Enquire →</a>
         </div>
         <div class="photo" style="background-image:url('images/fleet-executive.jpeg');"></div>
       </div>
@@ -302,7 +286,7 @@
       <div>
         <div class="eyebrow">Our Story</div>
         <h2>Family-Run, Built on Trust</h2>
-        <p style="color:var(--muted);margin-top:14px;font-size:14.5px;">Intercoutra was founded in 2019 — a family-owned and family-run business built on a simple idea: shuttle travel people could actually rely on. Our flagship service is the daily cross-border shuttle between Eswatini and Johannesburg, and our airport transfer service also reaches further afield on request — including Cape Town International and King Shaka International.</p>
+        <p style="color:var(--muted);margin-top:14px;font-size:14.5px;">Intercoutra was founded in 2019 — a family-owned and family-run business built on a simple idea: shuttle travel people could actually rely on. Our flagship service is the daily cross-border shuttle between Johannesburg and Eswatini, and our airport transfer service also reaches further afield on request — including Cape Town International and King Shaka International.</p>
         <p style="color:var(--muted);margin-top:12px;font-size:14.5px;">Every relationship starts the same way — an open door. We treat the people we drive as partners, not passengers, and our team of professional drivers carries that same standard into every trip, every day.</p>
         <div class="stat-row">
           <div><div class="num">2019</div><div class="lbl">Founded, Gauteng</div></div>
@@ -350,7 +334,7 @@
       </div>
       <div class="testi-card">
         <div class="quote-mark">"</div>
-        <p class="quote">The most reliable shuttle service between Eswatini and Johannesburg.</p>
+        <p class="quote">The most reliable shuttle service between Johannesburg and Eswatini.</p>
         <div class="stars">★★★★★</div>
         <div class="testi-person">
           <div class="testi-avatar">JK</div>
@@ -398,7 +382,7 @@
       <div>
         <img src="images/logo-intercoutra-white.png" alt="Intercoutra Shuttle Services" style="height:44px;width:auto;margin-bottom:6px;display:block;">
         <p style="font-size:11px;font-style:italic;color:#9A9A9A;margin-bottom:14px;">Driven by Excellence, Defined by Comfort</p>
-        <p style="font-size:13.5px;max-width:260px;">Providing premium shuttle services across Eswatini, South Africa and Lesotho.</p>
+        <p style="font-size:13.5px;max-width:260px;">Providing premium shuttle services across Eswatini and South Africa.</p>
       </div>
       <div>
         <h4>Quick Links</h4>
@@ -415,9 +399,9 @@
       <div>
         <h4>Contact Us</h4>
         <ul>
-          <li>+268 2404 3033</li>
-          <li>+268 76 3404 3833</li>
-          <li>booking@intercoutra.com</li>
+          <li>+27 74 351 8384</li>
+          <li>+27 66 286 9427</li>
+          <li>bookings@intercoutra.co.za</li>
           <li>Manzini, Eswatini</li>
         </ul>
       </div>
