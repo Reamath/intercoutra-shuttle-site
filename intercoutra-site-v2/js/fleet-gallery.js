@@ -7,9 +7,8 @@ const FLEET_VEHICLES = [
   {
     id: "bmw-320d",
     name: "BMW 320d",
-    tagline: "3 Series Saloon · Executive Sedan",
+    tagline: "3 Series Sedan · Executive Sedan",
     images: [
-      "images/fleet/bmw-320d-1.jpg",
       "images/fleet/bmw-320d-2.jpg",
     ],
   },
@@ -29,14 +28,13 @@ const FLEET_VEHICLES = [
     images: [
       "images/fleet/bmw-msport-1.jpg",
       "images/fleet/bmw-msport-2.jpg",
-      "images/fleet/bmw-msport-3.jpg",
       "images/fleet/bmw-msport-4.jpg",
     ],
   },
   {
     id: "bmw-320i",
     name: "BMW 320i",
-    tagline: "3 Series Saloon · Executive Sedan",
+    tagline: "3 Series Sedan · Executive Sedan",
     images: [
       "images/fleet/bmw-320i-1.jpg",
       "images/fleet/bmw-320i-2.jpg",
@@ -58,7 +56,7 @@ function renderFleetGalleryGrid() {
 
   grid.innerHTML = FLEET_VEHICLES.map((v) => `
     <div class="fleet-card gallery-card" onclick="openLightbox('${v.id}', 0)">
-      <div class="photo" style="background-image:url('images/fleet/thumbs/${v.id === 'bmw-320d' ? 'bmw-320d-1' : v.id === 'vito' ? 'vito-1' : v.id === 'bmw-msport' ? 'bmw-msport-1' : 'bmw-320i-1'}.jpg');">
+      <div class="photo" style="background-image:url('images/fleet/thumbs/${v.images[0].split('/').pop()}');">
         <div class="photo-count"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="15" height="15" rx="2"/><path d="M8 21h10a2 2 0 0 0 2-2V9"/></svg> ${v.images.length}</div>
         <div class="view-overlay">View Gallery →</div>
       </div>
