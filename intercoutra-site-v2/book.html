@@ -219,7 +219,7 @@
               <label>Book a Return?</label>
               <div class="book-toggle">
                 <div class="book-toggle-opt selected" id="toggleNo" onclick="setReturn(false)">No</div>
-                <div class="book-toggle-opt" id="toggleYes" onclick="setReturn(true)">Yes — save R200</div>
+                <div class="book-toggle-opt" id="toggleYes" onclick="setReturn(true)">Yes — save R100</div>
               </div>
             </div>
             <div class="book-field" id="returnDateField" style="display:none;">
@@ -247,7 +247,7 @@
               <div class="book-review-row"><span style="color:var(--muted);">Return</span><span id="rReturn" style="font-weight:600;"></span></div>
             </div>
 
-            <div class="book-price-total"><span style="font-weight:600;">Total Due</span><div class="amt" id="rPrice">R900</div></div>
+            <div class="book-price-total"><span style="font-weight:600;">Total Due</span><div class="amt" id="rPrice">R850</div></div>
 
             <div class="book-error" id="step4Error"></div>
             <button class="book-btn red" id="holdBtn" onclick="submitBooking()">Hold My Seat</button>
@@ -493,7 +493,7 @@ function goStep4(){
     ? new Date(selectedReturnTrip.departure_at).toLocaleString('en-ZA', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})
     : 'Not booked';
 
-  const total = wantsReturn ? 1600 : 900;
+  const total = wantsReturn ? 1600 : 850;
   document.getElementById('rPrice').textContent = `R${total.toLocaleString()}`;
 
   currentStep = 3; updateChrome();

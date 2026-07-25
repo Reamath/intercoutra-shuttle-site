@@ -128,7 +128,7 @@ nav.main-nav a:hover, nav.main-nav a.active{opacity:1;border-bottom:2px solid va
   background:var(--white);border-radius:10px;padding:16px 20px;
   box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
   position:relative;z-index:3;transform:translateY(40px);
-  max-width:800px;
+  max-width:800px;margin-left:auto;margin-right:auto;
 }
 .service-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 .service-tab{
@@ -151,7 +151,7 @@ nav.main-nav a:hover, nav.main-nav a.active{opacity:1;border-bottom:2px solid va
 .trip-toggle{display:flex;gap:16px;font-size:13px;align-items:center;color:var(--ink);margin-bottom:8px;}
 .trip-toggle label{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink);font-weight:500;}
 .trip-toggle input{accent-color:var(--red);width:15px;height:15px;}
-.booker-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;}
+.booker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end;}
 @media (max-width:900px){.booker-grid{grid-template-columns:1fr 1fr;}}
 @media (max-width:480px){.booker-grid{grid-template-columns:1fr;}}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0;}
@@ -173,7 +173,7 @@ nav.main-nav a:hover, nav.main-nav a.active{opacity:1;border-bottom:2px solid va
 .field-btn{grid-column:span 1;min-width:0;}
 @media (max-width:900px){.field-btn{grid-column:span 2;}}
 @media (max-width:480px){.field-btn{grid-column:span 1;}}
-.btn-search{width:100%;}
+.btn-search{width:100%;justify-content:center;}
 .hero-spacer{height:44px;background:var(--gray-bg);}
 
 /* Services grid */
@@ -193,6 +193,12 @@ nav.main-nav a:hover, nav.main-nav a.active{opacity:1;border-bottom:2px solid va
 .route-card{background:var(--white);border-radius:10px;overflow:hidden;border:1px solid var(--line-dark);display:flex;}
 .route-card .info{padding:18px;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
 .route-card .photo{width:110px;flex-shrink:0;background-size:cover;background-position:center;}
+#popularRoutesGrid{grid-template-columns:1fr 1fr;}
+@media (max-width:640px){
+  #popularRoutesGrid{grid-template-columns:1fr;}
+  #popularRoutesGrid .route-card{flex-direction:column;}
+  #popularRoutesGrid .route-card .photo{width:100%;height:170px;order:-1;}
+}
 .route-pair-line{display:flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-weight:600;font-size:14.5px;margin-bottom:3px;}
 .route-pair-line .pin{color:var(--red);font-size:12px;}
 .route-card .route-meta{font-size:12px;color:var(--muted);margin:8px 0 14px;}

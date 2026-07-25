@@ -75,7 +75,7 @@
         <div class="field" id="returnDateField" style="display:none;"><label>Return Date</label><input type="date" id="qbReturnDate"></div>
         <div class="field"><label>Passengers</label><select id="qbPax"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       </div>
-      <div id="returnNote" style="display:none;margin-top:10px;font-size:12.5px;color:var(--red);font-weight:600;">✓ Return leg R700 — save R200 vs. two one-way fares</div>
+      <div id="returnNote" style="display:none;margin-top:10px;font-size:12.5px;color:var(--red);font-weight:600;">✓ Return leg R750 — save R100 vs. two one-way fares</div>
       <div class="qb-error" id="qbError" style="display:none;margin-top:10px;font-size:12.5px;color:var(--red);"></div>
       <div style="margin-top:10px;">
         <button class="btn btn-red btn-search" onclick="submitQuickBooking()">Search Trips</button>
@@ -235,29 +235,50 @@
       </div>
       <a href="routes-schedules.html" class="link" style="color:var(--red);font-weight:600;font-size:14px;">View all routes →</a>
     </div>
-    <div class="route-cards" style="grid-template-columns:1fr 1fr;">
+    <div class="route-cards" id="popularRoutesGrid">
       <div class="route-card">
         <div class="info">
           <div>
-            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Johannesburg</div>
-            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Eswatini</div>
-            <div class="route-meta"><svg class="time-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Daily Shuttle, Both Directions</div>
+            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Sandton, Johannesburg</div>
+            <div class="route-meta"><svg class="time-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Daily Shuttle</div>
           </div>
-          <div class="route-foot"><div class="fare">From R900<span>per person one-way</span></div></div>
+          <div class="route-foot"><div class="fare">From R850<span>per person one-way</span></div></div>
           <a href="routes-schedules.html" class="btn btn-red btn-sm" style="margin-top:12px;">View Schedule</a>
         </div>
-        <div class="photo" style="background-image:url('images/hero-van.jpeg');"></div>
+        <div class="photo" style="background-image:url('images/routes/sandton.jpg');"></div>
       </div>
       <div class="route-card">
         <div class="info">
           <div>
-            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Airport Transfers</div>
-            <div class="route-meta">OR Tambo · King Shaka · Cape Town International</div>
+            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Eswatini</div>
+            <div class="route-meta"><svg class="time-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Daily Shuttle</div>
           </div>
-          <div class="route-foot"><div class="fare">Get a Quote<span>door-to-door, on request</span></div></div>
+          <div class="route-foot"><div class="fare">From R850<span>per person one-way</span></div></div>
+          <a href="routes-schedules.html" class="btn btn-red btn-sm" style="margin-top:12px;">View Schedule</a>
+        </div>
+        <div class="photo" style="background-image:url('images/routes/eswatini.jpg');"></div>
+      </div>
+      <div class="route-card">
+        <div class="info">
+          <div>
+            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Cape Town</div>
+            <div class="route-meta">Airport Transfer, On Request</div>
+          </div>
+          <div class="route-foot"><div class="fare">Get a Quote<span>door-to-door transfer</span></div></div>
           <a href="contact.html" class="btn btn-red btn-sm" style="margin-top:12px;">Enquire →</a>
         </div>
-        <div class="photo" style="background-image:url('images/fleet-executive.jpeg');"></div>
+        <div class="photo" style="background-image:url('images/routes/cape-town.jpg');"></div>
+      </div>
+      <div class="route-card">
+        <div class="info">
+          <div>
+            <div class="route-pair-line"><span class="pin"><svg class="pin-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span> Durban</div>
+            <div class="route-meta">Airport Transfer, On Request</div>
+          </div>
+          <div class="route-foot"><div class="fare">Get a Quote<span>door-to-door transfer</span></div></div>
+          <a href="contact.html" class="btn btn-red btn-sm" style="margin-top:12px;">Enquire →</a>
+        </div>
+        <div class="photo" style="background-image:url('images/routes/durban.jpg');"></div>
       </div>
     </div>
   </div>
