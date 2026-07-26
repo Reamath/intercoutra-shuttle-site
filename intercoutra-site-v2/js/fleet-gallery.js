@@ -8,6 +8,8 @@ const FLEET_VEHICLES = [
     id: "bmw-320d",
     name: "BMW 320d",
     tagline: "3 Series Sedan · Executive Sedan",
+    seats: 3,
+    service: "Charter & Executive",
     images: [
       "images/fleet/bmw-320d-2.jpg",
     ],
@@ -16,6 +18,8 @@ const FLEET_VEHICLES = [
     id: "vito",
     name: "Mercedes-Benz Vito Tourer",
     tagline: "Premium Passenger Shuttle",
+    seats: 5,
+    service: "Shared Shuttle",
     images: [
       "images/fleet/vito-1.jpg",
       "images/fleet/vito-2.jpg",
@@ -25,6 +29,8 @@ const FLEET_VEHICLES = [
     id: "bmw-msport",
     name: "BMW 3 Series M Sport",
     tagline: "Executive Sedan · M Sport Package",
+    seats: 3,
+    service: "Charter & Executive",
     images: [
       "images/fleet/bmw-msport-1.jpg",
       "images/fleet/bmw-msport-2.jpg",
@@ -35,6 +41,8 @@ const FLEET_VEHICLES = [
     id: "bmw-320i",
     name: "BMW 320i",
     tagline: "3 Series Sedan · Executive Sedan",
+    seats: 3,
+    service: "Charter & Executive",
     images: [
       "images/fleet/bmw-320i-1.jpg",
       "images/fleet/bmw-320i-2.jpg",
@@ -63,6 +71,10 @@ function renderFleetGalleryGrid() {
       <div class="body">
         <h3>${v.name}</h3>
         <p>${v.tagline}</p>
+        <div class="fleet-meta">
+          <span class="fleet-tag">${v.service}</span>
+          <span class="fleet-seats"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${v.seats} seats</span>
+        </div>
       </div>
     </div>
   `).join("");
@@ -105,7 +117,8 @@ function lightboxGoTo(i) {
 function renderLightbox() {
   if (!currentVehicle) return;
   document.getElementById("lightboxTitle").textContent = currentVehicle.name;
-  document.getElementById("lightboxTagline").textContent = currentVehicle.tagline;
+  document.getElementById("lightboxTagline").textContent =
+    `${currentVehicle.tagline} · ${currentVehicle.service} · ${currentVehicle.seats} seats`;
   document.getElementById("lightboxImage").src = currentVehicle.images[currentIndex];
   document.getElementById("lightboxCounter").textContent =
     (currentIndex + 1) + " / " + currentVehicle.images.length;

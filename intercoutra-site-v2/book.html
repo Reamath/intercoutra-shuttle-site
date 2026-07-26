@@ -106,6 +106,14 @@
   <div class="container">
     <div class="book-shell">
 
+      <!-- Honeypot - real visitors never see or fill this field (off-screen,
+           not display:none, since some bots specifically skip display:none
+           fields). Left non-empty means a bot filled every field blindly. -->
+      <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+        <label for="fWebsite">Leave this field empty</label>
+        <input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
       <div class="book-topbar">
         <div class="book-topbar-row">
           <div class="book-back" id="bookBack" onclick="prevStep()">←</div>
@@ -406,7 +414,7 @@ function goStep3(){
 }
 
 function stepVal(which, delta){
-  if(which==='pax'){ pax = Math.max(1, Math.min(6, pax+delta)); document.getElementById('paxVal').textContent = pax; renderPassengerNameFields(); }
+  if(which==='pax'){ pax = Math.max(1, Math.min(5, pax+delta)); document.getElementById('paxVal').textContent = pax; renderPassengerNameFields(); }
   if(which==='bags'){ bags = Math.max(0, Math.min(6, bags+delta)); document.getElementById('bagsVal').textContent = bags; }
 }
 
@@ -523,6 +531,7 @@ async function submitBooking(){
       large_bags: bags,
       other_bag_note: document.getElementById('fBagNote').value.trim() || null,
       passenger_names: collectPassengerNames(),
+      website: document.getElementById('fWebsite').value.trim() || null,
     };
 
     const res = await fetch(`${SUPABASE_URL}/functions/v1/create-booking`, {
@@ -558,7 +567,7 @@ updateChrome();
   if(incomingDirection){ document.getElementById('fDirection').value = incomingDirection; }
   if(incomingDate){ document.getElementById('fDate').value = incomingDate; }
   if(incomingPax){
-    pax = Math.max(1, Math.min(6, parseInt(incomingPax, 10) || 1));
+    pax = Math.max(1, Math.min(5, parseInt(incomingPax, 10) || 1));
     document.getElementById('paxVal').textContent = pax;
   }
   if(incomingReturn){
@@ -572,5 +581,6 @@ updateChrome();
 })();
 </script>
 
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

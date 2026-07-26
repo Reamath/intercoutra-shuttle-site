@@ -40,9 +40,9 @@
 
 <section class="page-hero">
   <div class="container">
-    <div class="eyebrow">Contact &amp; Book</div>
+    <div class="eyebrow">Contact Us</div>
     <h1>Let's Get You On the Road</h1>
-    <p>Send us your trip details and we'll confirm your booking directly.</p>
+    <p>Send us your trip details below and our team is alerted immediately by SMS and email — we don't wait on an inbox. Want an instant confirmed seat instead? Use <a href="book.html" style="color:inherit;text-decoration:underline;">Book Now</a>.</p>
   </div>
 </section>
 
@@ -50,7 +50,8 @@
   <div class="container">
     <div class="contact-grid">
       <div class="contact-card">
-        <h2 style="font-size:20px;margin-bottom:18px;">Request a Booking</h2>
+        <h2 style="font-size:20px;margin-bottom:18px;">Send Us Your Request</h2>
+        <p style="font-size:13px;color:var(--gray-500,#666);margin-top:-12px;margin-bottom:18px;">This alerts our team by SMS and email the moment you send it, so we can reply quickly on WhatsApp or email — it doesn't hold a seat. To reserve a seat instantly, use <a href="book.html">Book Now</a>.</p>
         <div class="form-field"><label>Full Name</label><input type="text" id="ctName" placeholder="Your full name"></div>
         <div class="form-field"><label>Email</label><input type="email" id="ctEmail" placeholder="you@email.com"></div>
         <div class="form-field"><label>Contact Number</label><input type="tel" id="ctPhone" placeholder="+27 82 000 0000"></div>
@@ -63,16 +64,17 @@
         <div class="form-field"><label>Departure Date</label><input type="date" id="ctDate"></div>
         <div class="form-field"><label>Number of Passengers</label>
           <select id="ctPax">
-            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
           </select>
         </div>
         <div class="form-field"><label>Message (optional)</label><textarea rows="3" id="ctMessage" placeholder="Any special requests? (e.g. luggage size, trailer needed)"></textarea></div>
         <div class="popia-box">
           <input type="checkbox" id="popia-consent">
-          <label for="popia-consent">I agree to my information being used to process this booking, in line with the <a href="privacy.html">Privacy Policy (POPIA)</a>. I understand I can opt in separately to receive marketing messages.</label>
+          <label for="popia-consent">I agree to my information being used to respond to this enquiry, in line with the <a href="privacy.html">Privacy Policy (POPIA)</a>. I understand I can opt in separately to receive marketing messages.</label>
         </div>
         <div id="ctError" style="display:none;margin-top:-6px;margin-bottom:14px;font-size:12.5px;color:var(--red);"></div>
-        <button class="btn btn-red" style="width:100%;" onclick="submitContactBooking()">Submit Booking Request</button>
+        <div id="ctConfirm" style="display:none;margin-top:-6px;margin-bottom:14px;font-size:13px;line-height:1.5;color:var(--dark,#1a1a1a);background:#F3F7F3;border:1px solid #D8E6D8;border-radius:8px;padding:12px 14px;"></div>
+        <button class="btn btn-red" style="width:100%;" id="ctSubmitBtn" onclick="submitContactBooking()">Send My Request</button>
       </div>
       <div>
         <div class="contact-card" style="margin-bottom:16px;">
@@ -144,10 +146,14 @@
 <script src="js/main.js"></script>
 <script>
   const CONTACT_WHATSAPP_NUMBER = '27743518384';
+  const SUPABASE_URL = "https://fqdxiwondspynpiplrjq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZHhpd29uZHNweW5waXBscmpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3ODY4MDEsImV4cCI6MjA5OTM2MjgwMX0.xn-SlGwsxzW7WfoU0AYKdURC_8QgI3_ILsdnDU7JLDc";
 
-  function submitContactBooking(){
+  async function submitContactBooking(){
     const errEl = document.getElementById('ctError');
+    const confirmEl = document.getElementById('ctConfirm');
     errEl.style.display = 'none';
+    confirmEl.style.display = 'none';
 
     const name = document.getElementById('ctName').value.trim();
     const email = document.getElementById('ctEmail').value.trim();
@@ -165,13 +171,41 @@
     if(!consent){ errEl.textContent = 'Please confirm you agree to the Privacy Policy to continue.'; errEl.style.display = 'block'; return; }
 
     const waMessage =
-      `Hi Intercoutra, I'd like to request a booking.\n\n` +
+      `Hi Intercoutra, I'd like to enquire about a trip.\n\n` +
       `Name: ${name}\nContact: ${phone}${email ? '\nEmail: ' + email : ''}\n` +
       `Route: ${route}\nDate: ${date}\nPassengers: ${pax}${message ? '\nMessage: ' + message : ''}`;
-
     const waLink = `https://wa.me/${CONTACT_WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`;
-    window.open(waLink, '_blank');
+
+    // Opened synchronously, on the click itself, so the browser doesn't
+    // treat it as a blocked popup once we `await` the fetch below - we
+    // just navigate this already-open tab once we're ready.
+    const waTab = window.open('', '_blank');
+
+    const btn = document.getElementById('ctSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Sending...';
+
+    let notified = false;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-enquiry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ name, phone, email: email || null, route, date, passengers: pax, message: message || null }),
+      });
+      const result = await res.json();
+      notified = !!result.success;
+    } catch (e) {
+      notified = false;
+    }
+
+    if (waTab) waTab.location = waLink;
+
+    confirmEl.textContent = notified
+      ? "Request sent — our team has been alerted by SMS and email and will reply on WhatsApp or email shortly. We've also opened WhatsApp so you can message us directly if you'd like."
+      : "We've opened WhatsApp for you to send your request directly — please send it there, since our automatic notification didn't go through this time.";
+    confirmEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Send My Request';
   }
 </script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
