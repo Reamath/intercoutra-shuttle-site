@@ -57,6 +57,27 @@
   .btn-tiny.cancel:hover{background:#FDEDEC;}
   .btn-tiny:disabled{opacity:.5;cursor:not-allowed;}
   .confirmed-note{font-size:11.5px;color:var(--muted);}
+
+  /* fleet add-forms (drivers/vehicles) */
+  .fleet-toolbar{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px;}
+  .fleet-add{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;flex-wrap:wrap;}
+  .fleet-add span{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-right:2px;}
+  .fleet-add input{padding:8px 10px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;width:140px;}
+  .fleet-add input[type="number"]{width:80px;}
+  .fleet-add button{background:var(--black);color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .fleet-msg{font-size:12px;color:#B3261E;margin-top:4px;}
+
+  /* trip job cards */
+  .trip-card{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .trip-card-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;background:var(--gray-bg-dim);flex-wrap:wrap;}
+  .trip-card-info{display:flex;flex-direction:column;gap:2px;}
+  .trip-card-route{font-weight:700;font-size:14.5px;}
+  .trip-card-meta{font-size:12px;color:var(--muted);}
+  .trip-card-assign{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .trip-card-assign label{font-size:11px;color:var(--muted);margin-right:4px;}
+  .trip-passengers table{box-shadow:none;border-radius:0;}
+  .trip-passengers th, .trip-passengers td{padding:8px 18px;}
+  .trip-empty-pax{padding:14px 18px;color:var(--muted);font-size:12.5px;font-style:italic;}
 </style>
 </head>
 <body>
@@ -103,11 +124,25 @@
   </div>
 
   <div class="panel" id="panel-trips">
-    <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Assign a driver and vehicle to each upcoming departure - done per trip, not fixed to a route.</p>
-    <table>
-      <thead><tr><th>Departure</th><th>Route</th><th>Seats</th><th>Driver</th><th>Vehicle</th></tr></thead>
-      <tbody id="tripsBody"></tbody>
-    </table>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Each card is one departure - assign a driver and vehicle, and see exactly who's booked on it. Sorted by departure date/time.</p>
+
+    <div class="fleet-toolbar">
+      <div class="fleet-add">
+        <span>Add Driver</span>
+        <input type="text" id="newDriverName" placeholder="Name">
+        <input type="text" id="newDriverPhone" placeholder="Phone (optional)">
+        <button onclick="addDriver()">+ Add</button>
+      </div>
+      <div class="fleet-add">
+        <span>Add Vehicle</span>
+        <input type="text" id="newVehicleLabel" placeholder="Label, e.g. Vito 2">
+        <input type="number" id="newVehicleCapacity" placeholder="Seats" value="5" min="1">
+        <button onclick="addVehicle()">+ Add</button>
+      </div>
+    </div>
+    <div class="fleet-msg" id="fleetMsg" style="display:none;"></div>
+
+    <div id="tripsBody"></div>
   </div>
 
   <div class="panel" id="panel-clients">
@@ -161,12 +196,16 @@ async function showDashboard(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   await Promise.all([loadBookings(), loadTrips(), loadClients(), loadDriversAndVehicles()]);
+  // loadBookings() and loadTrips() run in parallel, so whichever
+  // finishes first renders trip cards before the other's data is in -
+  // re-render once both are guaranteed done so passenger lists show up.
+  renderTrips();
 }
 
 async function loadBookings(){
   const { data, error } = await sb
     .from('bookings')
-    .select('id, booking_ref, status, passengers, large_bags, other_bag_note, fare_amount, created_at, confirmed_at, hold_expires_at, return_group_id, clients(first_name, surname, phone, alt_phone, email, emergency_contact_name, emergency_contact_phone, marketing_consent), trip_instances(origin_label, destination_label, departure_at), booking_passengers(full_name)')
+    .select('id, booking_ref, status, passengers, large_bags, other_bag_note, fare_amount, created_at, confirmed_at, hold_expires_at, return_group_id, trip_instance_id, clients(first_name, surname, phone, alt_phone, email, emergency_contact_name, emergency_contact_phone, marketing_consent), trip_instances(origin_label, destination_label, departure_at), booking_passengers(full_name)')
     .order('created_at', { ascending: false })
     .limit(200);
   if(error){ console.error(error); return; }
@@ -230,6 +269,7 @@ async function markBookingPaid(bookingId, returnGroupId){
   const { error } = await query;
   if(error){ alert('Could not confirm booking: ' + error.message); return; }
   await loadBookings();
+  renderTrips();
 }
 
 async function cancelBooking(bookingId, returnGroupId){
@@ -241,6 +281,7 @@ async function cancelBooking(bookingId, returnGroupId){
   const { error } = await query;
   if(error){ alert('Could not cancel booking: ' + error.message); return; }
   await loadBookings();
+  renderTrips();
 }
 
 // ---------- CSV export helpers ----------
@@ -329,41 +370,125 @@ async function loadDriversAndVehicles(){
   allVehicles = v.data || [];
 }
 
+function showFleetMsg(text){
+  const el = document.getElementById('fleetMsg');
+  el.textContent = text; el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+async function addDriver(){
+  const nameEl = document.getElementById('newDriverName');
+  const phoneEl = document.getElementById('newDriverPhone');
+  const name = nameEl.value.trim();
+  const phone = phoneEl.value.trim();
+  if(!name){ showFleetMsg('Enter a driver name first.'); return; }
+
+  const { error } = await sb.from('drivers').insert({ name, phone: phone || null });
+  if(error){ showFleetMsg('Could not add driver: ' + error.message); return; }
+
+  nameEl.value = ''; phoneEl.value = '';
+  await loadDriversAndVehicles();
+  renderTrips();
+}
+
+async function addVehicle(){
+  const labelEl = document.getElementById('newVehicleLabel');
+  const capacityEl = document.getElementById('newVehicleCapacity');
+  const label = labelEl.value.trim();
+  const capacity = parseInt(capacityEl.value, 10);
+  if(!label){ showFleetMsg('Enter a vehicle label first.'); return; }
+  if(!capacity || capacity < 1){ showFleetMsg('Enter a valid seat count.'); return; }
+
+  const { error } = await sb.from('vehicles').insert({ label, capacity });
+  if(error){ showFleetMsg('Could not add vehicle: ' + error.message); return; }
+
+  labelEl.value = ''; capacityEl.value = '5';
+  await loadDriversAndVehicles();
+  renderTrips();
+}
+
 async function loadTrips(){
   const now = new Date().toISOString();
   const twoWeeks = new Date(Date.now() + 14*24*60*60*1000).toISOString();
-  const { data, error } = await sb
-    .from('trip_instances')
-    .select('id, origin_label, destination_label, departure_at, driver_id, vehicle_id, trip_seat_availability(seats_available, capacity)')
-    .gte('departure_at', now)
-    .lte('departure_at', twoWeeks)
-    .eq('status', 'scheduled')
-    .order('departure_at')
-    .limit(100);
-  if(error){ console.error(error); return; }
-  allTrips = data || [];
+
+  // trip_seat_availability is a view, not a table with a real FK to
+  // trip_instances, so PostgREST can't auto-embed it (that previously
+  // 400'd here) - queried separately instead and merged below, same
+  // pattern book.html already uses successfully.
+  const [tripsRes, availRes] = await Promise.all([
+    sb.from('trip_instances')
+      .select('id, origin_label, destination_label, departure_at, driver_id, vehicle_id')
+      .gte('departure_at', now)
+      .lte('departure_at', twoWeeks)
+      .eq('status', 'scheduled')
+      .order('departure_at')
+      .limit(100),
+    sb.from('trip_seat_availability')
+      .select('trip_instance_id, seats_available, capacity')
+      .gte('departure_at', now)
+      .lte('departure_at', twoWeeks)
+  ]);
+
+  if(tripsRes.error){ console.error(tripsRes.error); return; }
+  if(availRes.error){ console.error(availRes.error); }
+
+  const availByTrip = new Map((availRes.data || []).map(a => [a.trip_instance_id, a]));
+  allTrips = (tripsRes.data || []).map(t => ({ ...t, availability: availByTrip.get(t.id) || null }));
   renderTrips();
 }
 
 function renderTrips(){
   const body = document.getElementById('tripsBody');
-  if(allTrips.length === 0){ body.innerHTML = '<tr><td colspan="5" class="empty">No upcoming trips in the next 14 days.</td></tr>'; return; }
+  if(allTrips.length === 0){ body.innerHTML = '<p class="empty">No upcoming trips in the next 14 days.</p>'; return; }
 
   const driverOptions = (selected) => '<option value="">— unassigned —</option>' +
     allDrivers.map(d => `<option value="${d.id}" ${d.id===selected?'selected':''}>${d.name}</option>`).join('');
   const vehicleOptions = (selected) => '<option value="">— unassigned —</option>' +
     allVehicles.map(v => `<option value="${v.id}" ${v.id===selected?'selected':''}>${v.label}</option>`).join('');
 
+  // allTrips is already ordered by departure_at from the query, so
+  // cards come out chronologically without re-sorting here.
   body.innerHTML = allTrips.map(t => {
-    const avail = t.trip_seat_availability?.[0]?.seats_available ?? t.capacity;
+    const avail = t.availability?.seats_available ?? t.availability?.capacity ?? '—';
+
+    // Passengers for this specific departure - cancelled bookings are
+    // excluded (they didn't end up on the trip); sorted by booking
+    // time, so whoever booked first shows first.
+    const passengers = allBookings
+      .filter(b => b.trip_instance_id === t.id && b.status !== 'cancelled')
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    const passengerRows = passengers.length === 0
+      ? `<div class="trip-empty-pax">No one's booked on this departure yet.</div>`
+      : `<table class="trip-passengers">
+          <thead><tr><th>Traveler</th><th>Phone</th><th>Pax</th><th>Luggage</th><th>Status</th></tr></thead>
+          <tbody>${passengers.map(b => `
+            <tr>
+              <td class="mono">${b.booking_ref} · ${b.clients ? b.clients.first_name + ' ' + b.clients.surname : '—'}</td>
+              <td class="mono">${b.clients ? b.clients.phone : '—'}</td>
+              <td>${b.passengers}</td>
+              <td>${b.large_bags} large${b.other_bag_note ? ', ' + b.other_bag_note : ''}</td>
+              <td><span class="status-pill ${b.status}">${b.status.replace('_',' ')}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+
     return `
-    <tr>
-      <td>${new Date(t.departure_at).toLocaleString('en-ZA', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</td>
-      <td>${t.origin_label} → ${t.destination_label}</td>
-      <td>${avail}</td>
-      <td><select class="assign" onchange="assignDriver('${t.id}', this.value)">${driverOptions(t.driver_id)}</select></td>
-      <td><select class="assign" onchange="assignVehicle('${t.id}', this.value)">${vehicleOptions(t.vehicle_id)}</select></td>
-    </tr>`;
+    <div class="trip-card">
+      <div class="trip-card-header">
+        <div class="trip-card-info">
+          <div class="trip-card-route">${t.origin_label} → ${t.destination_label}</div>
+          <div class="trip-card-meta">${new Date(t.departure_at).toLocaleString('en-ZA', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})} · ${avail} seats available</div>
+        </div>
+        <div class="trip-card-assign">
+          <label>Driver</label>
+          <select class="assign" onchange="assignDriver('${t.id}', this.value)">${driverOptions(t.driver_id)}</select>
+          <label>Vehicle</label>
+          <select class="assign" onchange="assignVehicle('${t.id}', this.value)">${vehicleOptions(t.vehicle_id)}</select>
+        </div>
+      </div>
+      <div class="trip-passengers">${passengerRows}</div>
+    </div>`;
   }).join('');
 }
 
