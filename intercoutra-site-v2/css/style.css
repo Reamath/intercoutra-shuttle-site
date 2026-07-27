@@ -211,7 +211,7 @@ nav.main-nav a:hover, nav.main-nav a.active{opacity:1;border-bottom:2px solid va
 .band-head{text-align:center;margin-bottom:32px;}
 .band-head .eyebrow{color:var(--red-light);}
 .band-head h2{color:var(--white);}
-.band-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:20px;text-align:center;}
+.band-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:20px;text-align:center;}
 @media (max-width:900px){.band-grid{grid-template-columns:repeat(3,1fr);}}
 @media (max-width:560px){.band-grid{grid-template-columns:1fr 1fr;}}
 .band-item .ic{width:44px;height:44px;background:#242424;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:var(--white);font-size:16px;}
