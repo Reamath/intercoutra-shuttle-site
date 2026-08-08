@@ -54,6 +54,18 @@ const FLEET_VEHICLES = [
 
 let currentVehicle = null;
 let currentIndex = 0;
+let fleetFilter = "all";
+
+// ---------------------------------------------------------------------------
+// Filter tabs (All Vehicles / Shared Shuttle / Charter & Executive)
+// ---------------------------------------------------------------------------
+function setFleetFilter(filter) {
+  fleetFilter = filter;
+  document.querySelectorAll("#fleetFilterTabs .service-tab").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.filter === filter);
+  });
+  renderFleetGalleryGrid();
+}
 
 // ---------------------------------------------------------------------------
 // Render the thumbnail grid into any element with id="fleetGalleryGrid"
@@ -62,7 +74,11 @@ function renderFleetGalleryGrid() {
   const grid = document.getElementById("fleetGalleryGrid");
   if (!grid) return;
 
-  grid.innerHTML = FLEET_VEHICLES.map((v) => `
+  const vehicles = fleetFilter === "all"
+    ? FLEET_VEHICLES
+    : FLEET_VEHICLES.filter((v) => v.service === fleetFilter);
+
+  grid.innerHTML = vehicles.map((v) => `
     <div class="fleet-card gallery-card" onclick="openLightbox('${v.id}', 0)">
       <div class="photo" style="background-image:url('images/fleet/thumbs/${v.images[0].split('/').pop()}');">
         <div class="photo-count"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="15" height="15" rx="2"/><path d="M8 21h10a2 2 0 0 0 2-2V9"/></svg> ${v.images.length}</div>

@@ -55,19 +55,20 @@
       <img src="images/logo-intercoutra.png" alt="Intercoutra Shuttle Services" style="height:64px;width:auto;">
     </a>
     <nav class="main-nav"><ul><li><a href="index.html" class="active">Home</a></li>
-<li><a href="#services">Services</a></li>
-<li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+<li><a href="routes-schedules.html">Shared Shuttle</a></li>
+<li><a href="airport-transfers.html">Airport Transfers</a></li>
+<li><a href="tours.html">Tours</a></li>
 <li><a href="fleet.html">Fleet</a></li>
 <li><a href="#about">About Us</a></li>
 <li><a href="contact.html">Contact</a></li>
 </ul></nav>
     <div class="nav-cta">
-      <a href="book.html" class="btn btn-red btn-sm">Book Now →</a>
+      <a href="book.html" class="btn btn-red btn-sm" data-track="nav_book_click">Book Now →</a>
       <div class="hamburger" onclick="toggleMobileNav()"><span></span><span></span><span></span></div>
     </div>
   </div>
   <div class="mobile-nav" id="mobileNav">
-    <ul><li><a href="index.html" class="active">Home</a></li><li><a href="#services">Services</a></li><li><a href="routes-schedules.html">Routes &amp; Schedules</a></li><li><a href="fleet.html">Fleet</a></li><li><a href="#about">About Us</a></li><li><a href="contact.html">Contact</a></li></ul>
+    <ul><li><a href="index.html" class="active">Home</a></li><li><a href="routes-schedules.html">Shared Shuttle</a></li><li><a href="airport-transfers.html">Airport Transfers</a></li><li><a href="tours.html">Tours</a></li><li><a href="fleet.html">Fleet</a></li><li><a href="#about">About Us</a></li><li><a href="contact.html">Contact</a></li></ul>
     <div class="mnav-cta"><a href="book.html" class="btn btn-red" style="width:100%;text-align:center;">Book Now →</a></div>
   </div>
 </header>
@@ -82,6 +83,9 @@
       <div class="hero-badge"><span class="ic">●</span> Always On Time</div>
       <div class="hero-badge"><span class="ic">●</span> Comfort &amp; Safety</div>
       <div class="hero-badge"><span class="ic">●</span> 24/7 Support</div>
+    </div>
+    <div class="hero-actions">
+      <a href="#services" class="btn btn-outline" data-track="explore_services_click">Explore Services ↓</a>
     </div>
 
     <div class="booker">
@@ -232,31 +236,31 @@
   <div class="container">
     <div class="section-head">
       <div class="eyebrow">Our Services</div>
-      <h2>Four Ways<br>to Travel With Us</h2>
+      <h2>What Can We<br>Take You To?</h2>
       <p style="margin-top:10px;">Whether you're travelling for business or leisure, we have the perfect transport solution for you.</p>
     </div>
-    <div class="cards-4" style="grid-template-columns:1fr 1fr;">
-      <div class="card most-popular">
-        <span class="most-popular-tag">Most Popular</span>
-        <h3>Shared Shuttle</h3>
-        <p>Affordable daily shared departures between Johannesburg and Eswatini, with fixed pick-up points and published schedules. Every seat comes with a Comfort Pack — water, snacks, and wet wipes.</p>
-        <a href="routes-schedules.html" class="link">View schedule →</a>
-      </div>
-      <div class="card">
+    <div class="cards-4">
+      <a href="airport-transfers.html" class="card" style="display:block;">
         <h3>Airport Transfers</h3>
-        <p>Reliable, first-class door-to-door transfers to and from OR Tambo, King Shaka and Cape Town International airports. Flight tracking included so we're always there when you land.</p>
-        <a href="contact.html" class="link">Book this service →</a>
-      </div>
-      <div class="card">
-        <h3>Private Charter</h3>
-        <p>A vehicle and driver dedicated entirely to your group's schedule — ideal for teams, events, and multi-stop itineraries.</p>
-        <a href="contact.html" class="link">Get a quote →</a>
-      </div>
-      <div class="card">
-        <h3>Executive Travel</h3>
-        <p>Premium vehicles and vetted, professional chauffeurs for business travel and VIP guests who expect the best.</p>
-        <a href="contact.html" class="link">Learn more →</a>
-      </div>
+        <p>Door-to-door transfers to and from Cape Town International, O.R. Tambo, Lanseria and King Shaka International airports. From R550.</p>
+        <span class="link">Book Now →</span>
+      </a>
+      <a href="routes-schedules.html" class="card most-popular" style="display:block;">
+        <span class="most-popular-tag">Most Popular</span>
+        <h3>Shared Shuttle Eswatini</h3>
+        <p>Our daily shared shuttle between Johannesburg and Eswatini, with fixed pick-up points and a Comfort Pack on every seat.</p>
+        <span class="link">Book Now →</span>
+      </a>
+      <a href="tours.html" class="card" style="display:block;">
+        <h3>Tours &amp; Experiences</h3>
+        <p>Guided tours across Johannesburg, Soweto and Cape Town — coming soon.</p>
+        <span class="link">Book Now →</span>
+      </a>
+      <a href="contact.html" class="card" style="display:block;">
+        <h3>Other Services</h3>
+        <p>Private charter and executive travel — a vehicle and driver dedicated to your schedule, for teams, events or VIP guests.</p>
+        <span class="link">Book Now →</span>
+      </a>
     </div>
   </div>
 </section>
@@ -343,12 +347,12 @@
       <div>
         <div class="eyebrow">Our Story</div>
         <h2>Family-Run, Built on Trust</h2>
-        <p style="color:var(--muted);margin-top:14px;font-size:14.5px;">Intercoutra was founded in 2019 — a family-owned and family-run business built on a simple idea: shuttle travel people could actually rely on. Our flagship service is the daily cross-border shuttle between Johannesburg and Eswatini, and our airport transfer service also reaches further afield on request — including Cape Town International and King Shaka International.</p>
+        <p style="color:var(--muted);margin-top:14px;font-size:14.5px;">Intercoutra was founded in 2019 — a family-owned and family-run business built on a simple idea: shuttle travel people could actually rely on. Our flagship service is the daily cross-border shuttle between Johannesburg and Eswatini, and our airport transfer service reaches four major airports — O.R. Tambo, Cape Town International, Lanseria and King Shaka International.</p>
         <p style="color:var(--muted);margin-top:12px;font-size:14.5px;">Every relationship starts the same way — an open door. We treat the people we drive as partners, not passengers, and our team of professional drivers carries that same standard into every trip, every day.</p>
         <div class="stat-row">
           <div><div class="num">2019</div><div class="lbl">Founded, Gauteng</div></div>
           <div><div class="num">Family</div><div class="lbl">Owned &amp; run</div></div>
-          <div><div class="num">3</div><div class="lbl">Major airports for transfers</div></div>
+          <div><div class="num">4</div><div class="lbl">Major airports for transfers</div></div>
         </div>
       </div>
       <div class="photo" style="background-image:url('images/fleet/bmw-320i-4.jpg');height:340px;border-radius:10px;background-size:cover;background-position:center;"></div>
@@ -445,8 +449,9 @@
         <h4>Quick Links</h4>
         <ul>
           <li><a href="index.html">Home</a></li>
-          <li><a href="#services">Services</a></li>
-          <li><a href="routes-schedules.html">Routes &amp; Schedules</a></li>
+          <li><a href="routes-schedules.html">Shared Shuttle</a></li>
+          <li><a href="airport-transfers.html">Airport Transfers</a></li>
+          <li><a href="tours.html">Tours</a></li>
           <li><a href="fleet.html">Fleet</a></li>
           <li><a href="#about">About Us</a></li>
           <li><a href="contact.html">Contact</a></li>
