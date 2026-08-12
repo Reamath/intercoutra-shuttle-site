@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin.html
-Disallow: /manage.html
-
-Sitemap: https://www.intercoutra.co.za/sitemap.xml
