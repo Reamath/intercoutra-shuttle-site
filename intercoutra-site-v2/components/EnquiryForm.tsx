@@ -7,9 +7,13 @@ import { trackEvent, getStoredUtm } from "@/lib/analytics";
 interface Props {
   /** Pre-selects and locks the service field when set (used on service landing pages). */
   service?: ServiceSlug;
+  /** Tighter styling + shorter copy, no message field - used for hero-embedded quick-quote forms. */
+  compact?: boolean;
+  /** Overrides the heading text (defaults to "Send an Enquiry" / "Book Your Seat Today!" in compact mode). */
+  title?: string;
 }
 
-export default function EnquiryForm({ service }: Props) {
+export default function EnquiryForm({ service, compact = false, title }: Props) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const startedRef = useRef(false);
@@ -79,9 +83,11 @@ export default function EnquiryForm({ service }: Props) {
     }
   }
 
+  const wrapperClass = compact ? "quick-form-card" : "enquiry-card";
+
   if (status === "success") {
     return (
-      <div className="enquiry-card">
+      <div className={wrapperClass}>
         <div className="form-success">
           Thanks — your enquiry has been sent. Our team has been alerted and will get back to you
           shortly by WhatsApp, phone or email.
@@ -91,8 +97,8 @@ export default function EnquiryForm({ service }: Props) {
   }
 
   return (
-    <div className="enquiry-card">
-      <h3 style={{ fontSize: 18, marginBottom: 4 }}>Send an Enquiry</h3>
+    <div className={wrapperClass}>
+      <h3 style={{ fontSize: 18, marginBottom: 4 }}>{title ?? (compact ? "Book Your Seat Today!" : "Send an Enquiry")}</h3>
       <p className="text-muted" style={{ fontSize: 12.5, marginBottom: 18 }}>
         We'll get back to you by WhatsApp, phone or email — usually within the hour.
       </p>
@@ -152,10 +158,12 @@ export default function EnquiryForm({ service }: Props) {
           </div>
         </div>
 
-        <div className="form-field">
-          <label htmlFor="message">Message (optional)</label>
-          <textarea id="message" name="message" rows={3} placeholder="Anything else we should know?" />
-        </div>
+        {!compact && (
+          <div className="form-field">
+            <label htmlFor="message">Message (optional)</label>
+            <textarea id="message" name="message" rows={3} placeholder="Anything else we should know?" />
+          </div>
+        )}
 
         {errorMsg && <div className="form-error">{errorMsg}</div>}
 
