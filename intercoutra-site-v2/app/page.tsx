@@ -6,6 +6,7 @@ import ServiceCard from "@/components/ServiceCard";
 import TrustBand from "@/components/TrustBand";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import EnquiryForm from "@/components/EnquiryForm";
+import { COMFORT_PACK_ITEMS } from "@/components/ComfortPackIcons";
 
 export const metadata: Metadata = {
   title: "Shuttle, Airport Transfers & Tours | South Africa & Eswatini",
@@ -163,10 +164,14 @@ export default function HomePage() {
               </div>
 
               <div className="icon-strip" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>
-                <div className="item" style={{ color: "#fff" }}>💧 Water</div>
-                <div className="item" style={{ color: "#fff" }}>🍪 Snacks</div>
-                <div className="item" style={{ color: "#fff" }}>🧻 Wet Wipes</div>
-                <div className="item" style={{ color: "#fff" }}>📶 Wi-Fi Onboard</div>
+                {COMFORT_PACK_ITEMS.map((c) => (
+                  <div className="item" style={{ color: "#fff" }} key={c.label}>
+                    <span className="icon-chip on-dark sm" aria-hidden="true">
+                      {c.icon}
+                    </span>
+                    {c.label}
+                  </div>
+                ))}
               </div>
               <div style={{ marginTop: 18 }}>
                 <Link href="/services/eswatini" className="link" style={{ color: "var(--red-light)", fontWeight: 600, fontSize: 13.5 }}>

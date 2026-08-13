@@ -8,7 +8,7 @@ export const CONTACT = {
   phoneSecondary: "+27 66 286 9427",
   whatsappNumber: "27743518384", // no leading +, wa.me format
   email: "bookings@intercoutra.co.za",
-  location: "Manzini, Eswatini",
+  location: "South Africa",
 };
 
 export type ServiceSlug = "airport" | "eswatini" | "soweto" | "cape-town";
