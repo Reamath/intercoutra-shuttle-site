@@ -1,6 +1,6 @@
 # Intercoutra Website — Handover Document
 
-**Last updated:** 2026-08-13
+**Last updated:** 2026-08-13 (updated same day after a live debugging session — see §10)
 **Written by:** Claude (Sonnet 5), for briefing a future Claude session (Claude Code or claude.ai) that picks up this project cold.
 
 This document is the single source of truth for "what is this project, what's been built, what's configured, what's left, and what to do next." If you're a fresh Claude session reading this for the first time: read this whole file before touching anything. It supersedes any older assumption that this is a static HTML site — it is now a Next.js app (see "The Big Change" below).
@@ -123,7 +123,7 @@ Schema lives at `edge-functions/create-enquiries-table.sql` (full contents in Ap
 - `service` is constrained to `airport | eswatini | soweto | cape-town`.
 - `status` is constrained to `new | contacted | quoted | booked | lost` — this is the pipeline Lawrence's team works through via `/admin/enquiries`.
 - RLS is enabled with **no public policies** — only the service-role key (used server-side in the Next.js API routes) can read or write. There is no anon-key access to this table, which is correct and intentional.
-- **This migration must be run once, manually, in the Supabase SQL editor.** As far as this handover's author knows, this had not yet been confirmed done as of 2026-08-13 — check `enquiries` exists in the Supabase Table Editor before assuming it's live.
+- **This migration has been run.** Confirmed 2026-08-13 — `enquiries` exists in the Supabase Table Editor (project `intercoutra-shuttle-site`, table list also includes the orphaned `clients`, `routes`, `booking_passengers`, and a `trip_seat_availability` view not mentioned elsewhere in this doc — same "orphaned, leave alone" rule applies to all of them).
 
 ### Existing table: `notification_recipients`
 
@@ -131,7 +131,7 @@ Not created by this rebuild — it already existed and is what `create-enquiry` 
 
 ### Orphaned tables (leave alone, don't drop without asking)
 
-`bookings`, `trip_instances`, `drivers`, `vehicles`, `booking_rate_limit` — all from the old booking system. No longer read or written by the live site.
+`bookings`, `trip_instances`, `drivers`, `vehicles`, `booking_rate_limit`, `clients`, `routes`, `booking_passengers`, and the `trip_seat_availability` view — all from the old booking system. No longer read or written by the live site.
 
 ### Two separate sets of credentials — don't confuse them
 
@@ -152,9 +152,12 @@ Full source of `create-enquiry` is in the Appendix. Notable details:
 - Email sender is currently `bookings@anchordrive.co.za` — a known, intentional stopgap (see §1 boundary note). Adrian's plan was to move to `bookings@intercoutrashuttles.co.za` once that domain existed. Status of that domain switch is unknown as of this handover — check before assuming either way.
 - A failure in the alert call **must never** fail the enquiry response to the visitor — the enquiry is already safely in the database by that point, and the route wraps the alert call in its own try/catch, logging but swallowing errors.
 
-### Status as of this handover: UNVERIFIED end-to-end
+### Status as of this handover: table created, still failing — see §10 for the live debugging session
 
-The person maintaining this session (Claude) does **not** have the Supabase service role key, so the full chain — enquiry submitted → row appears in `enquiries` → SMS arrives → email arrives → shows up correctly in `/admin/enquiries` — was **never tested against production**. Adrian was asked to run one real test enquiry and report back what worked; as of this document being written, that loop had not yet closed. **This is the top-priority verification step for whoever picks this up next.** See §8.
+The person maintaining this session (Claude) does **not** have the Supabase service role key, so this has been debugged via Adrian testing live and reporting back symptoms/screenshots, not by Claude testing directly. As of 2026-08-13:
+- The `enquiries` table did not exist at all when this was first tested — that's now fixed (see §5).
+- A test submission on `/contact` **still failed** after the table was created, showing "Something went wrong saving your enquiry. Please try WhatsApp instead." — the generic error the API route returns whenever `supabaseAdmin()` throws or the insert errors.
+- Since the table now exists, the leading suspect is that the **Vercel env vars** (`SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` in particular) are missing, wrong, or were added but the project hasn't been redeployed since. **This was not yet confirmed fixed as of this document being updated** — see §10 for the exact next steps handed to Adrian.
 
 ---
 
@@ -171,9 +174,9 @@ The person maintaining this session (Claude) does **not** have the Supabase serv
 
 In rough priority order:
 
-1. **Verify the enquiry → Supabase → SMS/email → admin pipeline end-to-end on production.** Not yet confirmed working. This was the very next task when this document was written — check the conversation for Adrian's test results, or re-run the test yourself if none exist yet: submit a real enquiry on a live service page, check the `enquiries` table, check for SMS/email, check `/admin/enquiries`.
-2. **Confirm the `enquiries` table migration was actually run** in Supabase (`edge-functions/create-enquiries-table.sql`). If step 1 fails with a "table does not exist" type error, this is why.
-3. **Confirm all Vercel env vars are set** (§5). The site was seen 404-ing in production once already after the rebuild — that specific issue was traced to Vercel's **Framework Preset still being set to "Other"** (leftover from the old static-site config) instead of "Next.js", which was fixed by changing the preset and redeploying. If new/weird routing failures show up again, check Framework Preset and Root Directory (`intercoutra-site-v2`) first before assuming it's a code bug.
+1. **Get the enquiry → Supabase → SMS/email → admin pipeline actually working on production.** In progress as of 2026-08-13 — the `enquiries` table is now created, but a live test still failed with a generic save error, most likely because Vercel is missing/stale on Supabase env vars. Follow the exact troubleshooting steps in §10 before doing anything else on this project. Don't re-diagnose from scratch — read §10 first so you don't repeat steps already ruled out.
+2. ~~Confirm the `enquiries` table migration was actually run~~ — **Done, 2026-08-13.** Table exists, confirmed in Supabase Table Editor.
+3. **Confirm all Vercel env vars are set** (§5) **and that a redeploy has happened since they were last added/changed.** The site was seen 404-ing in production once already after the rebuild — that specific issue was traced to Vercel's **Framework Preset still being set to "Other"** (leftover from the old static-site config) instead of "Next.js", which was fixed by changing the preset and redeploying. That's resolved. The *current* open issue (see §10) is a separate, still-unresolved one: enquiry submission failing even after the table was created.
 4. **Google Search Console** — needs re-verification/re-submission of the new sitemap, since every URL on the site changed shape.
 5. **Real tour photography** for Soweto and Cape Town — currently reusing the JHB skyline and Cape Town coastline photos as placeholders. Swap in real, dedicated tour photos when Adrian/Lawrence supply them.
 6. **GA4 / Meta Pixel IDs** — not supplied yet. Analytics code is ready and waiting for `NEXT_PUBLIC_GA_MEASUREMENT_ID` / `NEXT_PUBLIC_META_PIXEL_ID`.
@@ -193,6 +196,49 @@ In rough priority order:
 - **Commit locally after testing, then explicitly ask before pushing to live.** Adrian has consistently said yes for tested changes, but wants to be asked — especially for structural changes. Never auto-push.
 - **Communication style:** Adrian is direct, no fluff, corrects fast when something's off. Don't over-explain basics; do the work, flag genuine open questions.
 - **Visually verify before calling something done** — use the browser preview tools, check for console errors and horizontal overflow, don't ship on faith that CSS "should" work.
+
+---
+
+## 10. Live Debugging Log — Post-Deploy Issues (2026-08-13)
+
+Two real production issues came up right after go-live. Both are documented here in full so nobody re-diagnoses them from scratch. **Read this whole section before touching Vercel or Supabase settings for this project.**
+
+### Issue A: production showed a 404 on every page — RESOLVED
+
+**Symptom:** immediately after the first Next.js deploy, both the custom domain and the deployment's own `*.vercel.app` URL returned 404 on `/`.
+
+**Root cause:** the Vercel project's **Framework Preset** was still set to **"Other"**, left over from when this was a static HTML site (pre-2026-08-13). With that preset, Vercel doesn't run the app as a Next.js server — it doesn't know to apply Next.js's routing/build conventions, so requests to `/` (and everything else) had nothing to resolve to.
+
+**Fix applied:**
+1. Vercel → Project Settings → Build and Deployment → Framework Settings → change **Framework Preset** from "Other" to **"Next.js"**.
+2. Leave all the Override toggles (Build Command / Output Directory / Install Command / Development Command) **off** — Next.js's own defaults are correct once the preset is right.
+3. Save.
+4. Deployments tab → open the latest deployment → **⋯ menu → Redeploy** (changing the framework setting alone does not rebuild the existing deployment — a fresh deploy is required).
+
+Confirmed working after this — site loads correctly on both the custom domain and the Vercel URL. **Root Directory was already correctly set to `intercoutra-site-v2` throughout — that was never the problem, only Framework Preset was wrong.**
+
+### Issue B: enquiry form fails to save — IN PROGRESS, not yet confirmed resolved
+
+**Symptom:** submitting the enquiry form (tested on `/contact`) shows the red error "Something went wrong saving your enquiry. Please try WhatsApp instead." — this is the generic error `app/api/enquiries/route.ts` returns whenever either `supabaseAdmin()` throws (missing/bad `SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` env vars) or the Supabase insert itself errors.
+
+**Diagnosis steps taken so far:**
+1. Checked the Supabase Table Editor (project `intercoutra-shuttle-site`, `fqdxiwondspynpiplrjq`) — confirmed the `enquiries` table **did not exist yet**. This alone was enough to cause every submission to fail, since the INSERT has nothing to write to.
+2. **Fix applied:** ran `edge-functions/create-enquiries-table.sql` in the Supabase SQL Editor. Confirmed success, `enquiries` now appears in the Table Editor.
+3. **Re-tested** the same form submission (real data: name "Thanyane John Adrian Mathidi", phone `+27699324208`, email `adrian.mathidi@gmail.com`, service Eswatini Shuttle) — **still failed** with the exact same generic error.
+4. Since the table now genuinely exists, the leading hypothesis is that **Vercel's `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` env vars are missing, wrong, or were never picked up by a deployment** (Vercel typically needs a fresh deploy after env vars are added/changed for serverless functions to see them).
+
+**Next steps handed to Adrian (not yet confirmed done as of this doc update):**
+1. Vercel → Project → Settings → Environment Variables. Confirm these all exist with real, non-blank values, applied at least to **Production**:
+   - `SUPABASE_URL` = `https://fqdxiwondspynpiplrjq.supabase.co`
+   - `SUPABASE_SERVICE_ROLE_KEY` = the `service_role` secret key from Supabase → Project Settings → API
+   - `SUPABASE_ANON_KEY` = the `anon` `public` key from the same page
+   - `ADMIN_PASSWORD` = any chosen password for `/admin`
+   - `ADMIN_SESSION_TOKEN` = any long random string
+2. If any were missing or just added/edited, **redeploy** (Deployments → latest → ⋯ → Redeploy) — env var changes don't retroactively apply to an already-built deployment.
+3. Re-test the same form submission.
+4. **If it still fails after that:** the next diagnostic step is Vercel's function logs, not more guessing. Deployments → the relevant deployment → Functions/Logs tab → filter for `/api/enquiries` → find the real underlying error (it'll be a proper Postgres/Supabase error message, not the generic visitor-facing one). That log line is what determines the actual next fix — could be a wrong key, a typo'd URL, an RLS issue (shouldn't be, since the service role key bypasses RLS, but verify `SUPABASE_SERVICE_ROLE_KEY` is genuinely the *service role* key and not the anon key pasted into the wrong slot), or something else entirely.
+
+**Whoever picks this up:** check whether Adrian has since reported success or a new error before repeating steps 1–3. If §8 item 1 above still shows this as open, assume steps 1–4 have not been completed/confirmed yet.
 
 ---
 
