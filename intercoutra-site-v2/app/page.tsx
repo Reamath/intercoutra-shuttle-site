@@ -24,9 +24,19 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      <section className="split-hero">
-        <div className="split-hero-inner">
-          <div className="split-hero-copy">
+      <section className="hero">
+        <div className="hero-bg">
+          <Image
+            src="/images/hero-fleet-jhb-skyline.png"
+            alt="Intercoutra fleet of three vehicles against the Johannesburg skyline"
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover", objectPosition: "center 60%" }}
+          />
+        </div>
+        <div className="hero-inner">
+          <div style={{ maxWidth: 620 }}>
             <div className="eyebrow">Safe. Reliable. Comfortable.</div>
             <h1>
               Your Journey,
@@ -76,16 +86,6 @@ export default function HomePage() {
                 Enquire Now
               </Link>
             </div>
-          </div>
-          <div className="split-hero-photo">
-            <Image
-              src="/images/fleet/vito-1.jpg"
-              alt="Intercoutra Mercedes-Benz Vito Tourer"
-              fill
-              priority
-              sizes="(max-width: 900px) 100vw, 50vw"
-              style={{ objectFit: "cover" }}
-            />
           </div>
         </div>
       </section>

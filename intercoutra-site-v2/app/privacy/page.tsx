@@ -3,7 +3,7 @@ import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Intercoutra collects, uses and protects your personal information, in line with POPIA.",
+  description: "How Intercoutra collects, uses and protects your personal information.",
   alternates: { canonical: `${SITE_URL}/privacy` },
   robots: { index: false },
 };
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <section className="page-hero">
         <div className="container">
           <div className="eyebrow">Privacy Policy</div>
-          <h1>Privacy Policy (POPIA)</h1>
+          <h1>Privacy Policy</h1>
         </div>
       </section>
 
@@ -49,9 +49,9 @@ export default function PrivacyPage() {
 
           <h2 style={{ fontSize: 19, marginBottom: 10 }}>Your Rights</h2>
           <p className="text-muted" style={{ fontSize: 14.5, marginBottom: 22 }}>
-            Under POPIA, you have the right to request access to the personal information we hold
-            about you, ask us to correct it, or request that it be deleted, subject to any legal or
-            operational requirements we may have to retain certain records.
+            You have the right to request access to the personal information we hold about you, ask
+            us to correct it, or request that it be deleted, subject to any legal or operational
+            requirements we may have to retain certain records.
           </p>
 
           <h2 style={{ fontSize: 19, marginBottom: 10 }}>Contact Us About Your Information</h2>

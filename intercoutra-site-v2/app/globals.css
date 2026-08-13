@@ -880,14 +880,18 @@ nav.main-nav a[aria-current="page"] {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #e9f7ea;
-  color: #2e7d32;
+  background: #fbe7e8;
+  color: var(--red);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   margin-top: 1px;
+}
+.check-list.on-dark li .tick {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--red-light);
 }
 .check-list.on-dark li {
   color: #e4e4e4;

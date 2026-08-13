@@ -22,6 +22,82 @@ export const metadata: Metadata = {
   },
 };
 
+const HERO_HIGHLIGHTS = [
+  {
+    title: "Comfort Pack Included",
+    desc: "Water, snacks, wet wipes",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 8l1.5-4h13L20 8" />
+        <path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z" />
+        <path d="M9 12a3 3 0 0 0 6 0" />
+      </svg>
+    ),
+  },
+  {
+    title: "Wi-Fi On Board",
+    desc: "Stay connected",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 8.5a16 16 0 0 1 20 0" />
+        <path d="M5.5 12.5a11 11 0 0 1 13 0" />
+        <path d="M9 16.5a6 6 0 0 1 6 0" />
+        <circle cx="12" cy="19.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    title: "Daily Departures",
+    desc: "On time, every day",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3.5" y="5" width="17" height="16" rx="2" />
+        <path d="M8 3v4M16 3v4M3.5 10h17" />
+      </svg>
+    ),
+  },
+];
+
+const COMFORT_ITEMS = [
+  {
+    label: "Water",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Snacks",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 2l1 3M12 2l-1 3M18 2l-1 3" />
+        <path d="M4 8h16l-1.5 12a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Wet Wipes",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3.5" y="5" width="17" height="14" rx="2" />
+        <path d="M8 5v14M16 5v14" strokeDasharray="2 2" />
+      </svg>
+    ),
+  },
+  {
+    label: "Wi-Fi On Board",
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 8.5a16 16 0 0 1 20 0" />
+        <path d="M5.5 12.5a11 11 0 0 1 13 0" />
+        <path d="M9 16.5a6 6 0 0 1 6 0" />
+        <circle cx="12" cy="19.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+];
+
 export default function EswatiniPage() {
   return (
     <>
@@ -48,11 +124,21 @@ export default function EswatiniPage() {
                 to <span style={{ color: "var(--red-light)" }}>Eswatini</span>
               </h1>
               <p className="lede">{service.tagline}</p>
-              <div className="icon-strip" style={{ background: "transparent", border: "none", padding: 0, justifyContent: "flex-start", gap: 22, marginBottom: 22 }}>
-                <div className="item" style={{ color: "#fff" }}>💧🍪🧻 Comfort Pack Included</div>
-                <div className="item" style={{ color: "#fff" }}>📶 Wi-Fi On Board</div>
-                <div className="item" style={{ color: "#fff" }}>📅 Daily Departures</div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 13, marginBottom: 24 }}>
+                {HERO_HIGHLIGHTS.map((h) => (
+                  <div className="feature-row on-dark" key={h.title}>
+                    <div className="icon-chip on-dark sm" aria-hidden="true">
+                      {h.icon}
+                    </div>
+                    <div>
+                      <h4 style={{ color: "#fff" }}>{h.title}</h4>
+                      <p>{h.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
+
               <div className="hero-actions">
                 <a href="#enquiry-form" className="btn btn-red">
                   Enquire Now
@@ -78,7 +164,7 @@ export default function EswatiniPage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" style={{ paddingBottom: 30 }}>
         <div className="container">
           <div className="two-col">
             <div className="dark-card">
@@ -115,24 +201,37 @@ export default function EswatiniPage() {
               </div>
 
               <div className="notice-box" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", color: "#cfcfcf" }}>
-                <span aria-hidden="true">ℹ️</span>
+                <span className="icon-chip on-dark sm" aria-hidden="true" style={{ flexShrink: 0 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><circle cx="12" cy="8" r="0.5" fill="currentColor" /></svg>
+                </span>
                 <div>
                   O.R. Tambo pickup depends on your flight arrival time, subject to availability —
                   share your flight details when you enquire.
                 </div>
-              </div>
-
-              <div className="icon-strip" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", marginTop: 18 }}>
-                <div className="item" style={{ color: "#fff" }}>💧 Water</div>
-                <div className="item" style={{ color: "#fff" }}>🍪 Snacks</div>
-                <div className="item" style={{ color: "#fff" }}>🧻 Wet Wipes</div>
-                <div className="item" style={{ color: "#fff" }}>📶 Wi-Fi Onboard</div>
               </div>
             </div>
 
             <div id="enquiry-form">
               <EnquiryForm service="eswatini" compact title="Book Your Seat Today!" />
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="container">
+          <div className="eyebrow" style={{ justifyContent: "center", display: "flex", marginBottom: 22 }}>
+            Comfort Pack Included
+          </div>
+          <div className="icon-strip">
+            {COMFORT_ITEMS.map((c) => (
+              <div className="item" key={c.label}>
+                <span className="icon-chip sm" aria-hidden="true">
+                  {c.icon}
+                </span>
+                {c.label}
+              </div>
+            ))}
           </div>
         </div>
       </section>

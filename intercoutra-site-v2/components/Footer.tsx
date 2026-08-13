@@ -51,10 +51,9 @@ export default function Footer() {
       <div className="footer-bottom">
         <div>
           © {new Date().getFullYear()} Intercoutra Shuttle Services. All rights reserved. ·{" "}
-          <Link href="/privacy" style={{ textDecoration: "underline" }}>Privacy Policy (POPIA)</Link> ·{" "}
+          <Link href="/privacy" style={{ textDecoration: "underline" }}>Privacy Policy</Link> ·{" "}
           <Link href="/terms" style={{ textDecoration: "underline" }}>Terms &amp; Conditions</Link>
         </div>
-        <div>Licensed cross-border operator</div>
       </div>
     </footer>
   );

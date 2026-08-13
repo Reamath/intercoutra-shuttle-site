@@ -61,7 +61,7 @@ export default function TermsPage() {
               Privacy Policy
             </a>
             , which explains what information we collect and how it&apos;s used, in line with South
-            Africa&apos;s Protection of Personal Information Act (POPIA).
+            Africa&apos;s data protection law.
           </p>
 
           <h2 style={{ fontSize: 19, marginBottom: 10 }}>7. Contact</h2>
