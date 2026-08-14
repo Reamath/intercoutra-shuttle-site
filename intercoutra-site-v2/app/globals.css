@@ -308,6 +308,15 @@ nav.main-nav a[aria-current="page"] {
     rgba(10, 10, 10, 0.35) 85%
   ), linear-gradient(0deg, rgba(10, 10, 10, 0.55), rgba(10, 10, 10, 0.15));
 }
+/* Lighter overlay variant - used where the photo itself is already
+   moody/dark, so the default overlay makes it too dark overall. */
+.hero .hero-bg.overlay-light::after {
+  background: linear-gradient(
+    90deg,
+    rgba(10, 10, 10, 0.72) 20%,
+    rgba(10, 10, 10, 0.1) 85%
+  ), linear-gradient(0deg, rgba(10, 10, 10, 0.3), rgba(10, 10, 10, 0.02));
+}
 .hero-inner {
   position: relative;
   z-index: 2;
@@ -1022,15 +1031,17 @@ nav.main-nav a[aria-current="page"] {
 
 /* Pricing card - dark box with a red highlighted return price */
 .pricing-card-dark {
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 .pricing-card-dark .tier {
-  padding: 16px 20px;
+  padding: 22px 28px;
 }
 .pricing-card-dark .tier.one-way {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(20, 20, 20, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #fff;
 }
 .pricing-card-dark .tier.return {
@@ -1038,21 +1049,21 @@ nav.main-nav a[aria-current="page"] {
   color: #fff;
 }
 .pricing-card-dark .tier .lbl {
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.85;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .pricing-card-dark .tier .amt {
   font-family: var(--font-poppins), sans-serif;
   font-weight: 700;
-  font-size: 26px;
+  font-size: 34px;
   line-height: 1;
 }
 .pricing-card-dark .tier .save {
-  font-size: 11.5px;
-  margin-top: 4px;
+  font-size: 13px;
+  margin-top: 6px;
   opacity: 0.9;
 }
 

@@ -63,7 +63,7 @@ export default function EswatiniPage() {
   return (
     <>
       <section className="hero">
-        <div className="hero-bg">
+        <div className="hero-bg overlay-light">
           <Image
             src={service.image}
             alt={service.imageAlt}
@@ -108,7 +108,7 @@ export default function EswatiniPage() {
               </div>
             </div>
 
-            <div className="pricing-card-dark" style={{ flex: "0 0 240px", boxShadow: "0 30px 60px -24px rgba(0,0,0,.6)" }}>
+            <div className="pricing-card-dark" style={{ flex: "0 0 300px", boxShadow: "0 30px 60px -24px rgba(0,0,0,.6)" }}>
               <div className="tier one-way">
                 <div className="lbl">Pricing · One Way</div>
                 <div className="amt">R{ESWATINI_FARE.oneWay}</div>
@@ -157,7 +157,10 @@ export default function EswatiniPage() {
                 </div>
                 <div>
                   <h3>Return (Eswatini to SA)</h3>
-                  <p>Departs Manzini 02:00 PM — back to Sandton</p>
+                  <p>02:00 PM — Manzini, departure</p>
+                  <p>03:00 PM — Mbabane</p>
+                  <p>O.R. Tambo — drop-off, subject to arrangement</p>
+                  <p>08:00 PM — Sandton, arrival</p>
                 </div>
               </div>
 
