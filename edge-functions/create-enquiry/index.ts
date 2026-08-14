@@ -3,9 +3,12 @@
 // create-booking, this does NOT write to bookings/trip_instances -
 // there's no seat held, no fare charged, no trip_instance_id (the
 // contact page only has a free-text route/date, not a real departure
-// selection). Its only job is to alert dispatch immediately by SMS
-// and email so a human can follow up on WhatsApp or email, mirroring
-// create-booking's notification step.
+// selection). Its job is twofold:
+//   1. Alert dispatch immediately by SMS and email so a human follows up.
+//   2. Acknowledge the client themselves - a prefilled WhatsApp link for
+//      dispatch to send with one click, plus a direct confirmation email
+//      if the client gave one. Neither of these promises a booking or a
+//      price - they just confirm the enquiry was received.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -50,13 +53,23 @@ Deno.serve(async (req) => {
       .eq("active", true);
 
     const enquiryRef = "ICE-" + Math.floor(1000 + Math.random() * 9000);
-    const dispatchWaLink = `wa.me/${phone.replace(/[^0-9]/g, "")}`;
+    const clientPhoneDigits = phone.replace(/[^0-9]/g, "");
+
+    // Client-facing WhatsApp acknowledgment - a prefilled message dispatch
+    // can send to the client with one click. Doesn't promise a price or a
+    // confirmed booking, just that the enquiry was received.
+    const clientWaMessage = toGsm7Safe(
+      `Hi ${name}, thank you for your enquiry with Intercoutra Shuttle Services regarding ${route || "your trip"}. ` +
+      `We've received your details (ref ${enquiryRef}) and one of our team will be in touch shortly to help arrange everything. ` +
+      `Feel free to reply here if you have any questions in the meantime.`
+    );
+    const clientWaLink = `wa.me/${clientPhoneDigits}?text=${encodeURIComponent(clientWaMessage)}`;
 
     const smsBody = toGsm7Safe(
-      `${enquiryRef} ENQUIRY: ${name}, ${route || "route TBC"}, ${date}, ${passengers || 1}pax. ${dispatchWaLink}`
+      `${enquiryRef} ENQUIRY: ${name}, ${route || "route TBC"}, ${date}, ${passengers || 1}pax. wa.me/${clientPhoneDigits}`
     );
 
-    // -- SMS via SMSPortal --
+    // -- SMS via SMSPortal (internal alert to dispatch) --
     const smsportalClientId = Deno.env.get("SMSPORTAL_CLIENT_ID");
     const smsportalSecret = Deno.env.get("SMSPORTAL_CLIENT_SECRET");
     if (smsportalClientId && smsportalSecret && recipients) {
@@ -97,15 +110,15 @@ Deno.serve(async (req) => {
     }
 
     // -- Email via Resend --
-    // Internal-only, same as create-booking's philosophy: client-facing
-    // auto-confirmation is a later phase. The team replies to the
-    // client by WhatsApp or email themselves once they see this.
     const resendKey = Deno.env.get("RESEND_API_KEY");
     const fromAddress = Deno.env.get("NOTIFICATION_FROM_EMAIL") || "Intercoutra Shuttle Services <bookings@anchordrive.co.za>";
+
     if (resendKey) {
+      // Internal alert to dispatch - includes the prefilled WhatsApp link
+      // so a human can message the client back with one click.
       const internalEmails = (recipients || []).filter((r) => r.email).map((r) => r.email);
       if (internalEmails.length > 0) {
-        const emailResponse = await fetch("https://api.resend.com/emails", {
+        const internalEmailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -124,21 +137,58 @@ Deno.serve(async (req) => {
               <p>Date: ${date}</p>
               <p>Passengers: ${passengers || 1}</p>
               ${message ? `<p>Message: ${message}</p>` : ""}
-              <p><a href="https://${dispatchWaLink}">Message ${name} on WhatsApp →</a></p>
+              <p><a href="https://${clientWaLink}">Message ${name} on WhatsApp (prefilled) →</a></p>
             `,
           }),
         });
-        if (!emailResponse.ok) {
-          console.error("Resend rejected the request:", emailResponse.status, await emailResponse.text());
+        if (!internalEmailResponse.ok) {
+          console.error("Resend rejected the internal alert:", internalEmailResponse.status, await internalEmailResponse.text());
         } else {
-          console.log("Resend accepted the request:", await emailResponse.text());
+          console.log("Resend accepted the internal alert:", await internalEmailResponse.text());
+        }
+      }
+
+      // Client-facing acknowledgment - only sent if the client gave an
+      // email. Confirms receipt only, no price or booking promise; a
+      // human still follows up to actually arrange the trip.
+      if (email) {
+        const clientEmailResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${resendKey}`,
+          },
+          body: JSON.stringify({
+            from: fromAddress,
+            to: [email],
+            subject: `We've received your enquiry - Intercoutra Shuttle Services (ref ${enquiryRef})`,
+            html: `
+              <p>Hi ${name},</p>
+              <p>Thank you for your enquiry with Intercoutra Shuttle Services. We've received your request and one of our team will be in touch shortly by WhatsApp, phone or email to help arrange your trip.</p>
+              <p><strong>Your enquiry details</strong></p>
+              <ul>
+                <li>Reference: ${enquiryRef}</li>
+                <li>Service: ${route || "not specified"}</li>
+                <li>Date: ${date}</li>
+                <li>Passengers: ${passengers || 1}</li>
+                ${message ? `<li>Message: ${message}</li>` : ""}
+              </ul>
+              <p>If you'd like to reach us directly in the meantime, you're welcome to reply to this email or message us on WhatsApp.</p>
+              <p>Intercoutra Shuttle Services<br>Safe. Reliable. Comfortable.</p>
+            `,
+          }),
+        });
+        if (!clientEmailResponse.ok) {
+          console.error("Resend rejected the client acknowledgment:", clientEmailResponse.status, await clientEmailResponse.text());
+        } else {
+          console.log("Resend accepted the client acknowledgment:", await clientEmailResponse.text());
         }
       }
     } else {
       console.log("Resend not attempted - missing RESEND_API_KEY.");
     }
 
-    return new Response(JSON.stringify({ success: true, enquiry_ref: enquiryRef }),
+    return new Response(JSON.stringify({ success: true, enquiry_ref: enquiryRef, client_whatsapp_link: `https://${clientWaLink}` }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (err) {

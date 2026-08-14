@@ -174,9 +174,9 @@ The person maintaining this session (Claude) does **not** have the Supabase serv
 
 In rough priority order:
 
-1. **Get the enquiry → Supabase → SMS/email → admin pipeline actually working on production.** In progress as of 2026-08-13 — the `enquiries` table is now created, but a live test still failed with a generic save error, most likely because Vercel is missing/stale on Supabase env vars. Follow the exact troubleshooting steps in §10 before doing anything else on this project. Don't re-diagnose from scratch — read §10 first so you don't repeat steps already ruled out.
+1. ~~Get the enquiry → Supabase → SMS/email → admin pipeline actually working on production~~ — **Done, 2026-08-14.** Root cause was two-fold: the `enquiries` table didn't exist yet, and Vercel had zero environment variables configured at all. Both fixed, confirmed working end-to-end. Full story in §10.
 2. ~~Confirm the `enquiries` table migration was actually run~~ — **Done, 2026-08-13.** Table exists, confirmed in Supabase Table Editor.
-3. **Confirm all Vercel env vars are set** (§5) **and that a redeploy has happened since they were last added/changed.** The site was seen 404-ing in production once already after the rebuild — that specific issue was traced to Vercel's **Framework Preset still being set to "Other"** (leftover from the old static-site config) instead of "Next.js", which was fixed by changing the preset and redeploying. That's resolved. The *current* open issue (see §10) is a separate, still-unresolved one: enquiry submission failing even after the table was created.
+3. ~~Confirm all Vercel env vars are set~~ — **Done, 2026-08-14.** All 5 required vars added, redeployed, confirmed working. Also separately resolved: the Framework Preset 404 issue from just after the rebuild (§10, Issue A).
 4. **Google Search Console** — needs re-verification/re-submission of the new sitemap, since every URL on the site changed shape.
 5. **Real tour photography** for Soweto and Cape Town — currently reusing the JHB skyline and Cape Town coastline photos as placeholders. Swap in real, dedicated tour photos when Adrian/Lawrence supply them.
 6. **GA4 / Meta Pixel IDs** — not supplied yet. Analytics code is ready and waiting for `NEXT_PUBLIC_GA_MEASUREMENT_ID` / `NEXT_PUBLIC_META_PIXEL_ID`.
@@ -217,28 +217,18 @@ Two real production issues came up right after go-live. Both are documented here
 
 Confirmed working after this — site loads correctly on both the custom domain and the Vercel URL. **Root Directory was already correctly set to `intercoutra-site-v2` throughout — that was never the problem, only Framework Preset was wrong.**
 
-### Issue B: enquiry form fails to save — IN PROGRESS, not yet confirmed resolved
+### Issue B: enquiry form fails to save — RESOLVED
 
-**Symptom:** submitting the enquiry form (tested on `/contact`) shows the red error "Something went wrong saving your enquiry. Please try WhatsApp instead." — this is the generic error `app/api/enquiries/route.ts` returns whenever either `supabaseAdmin()` throws (missing/bad `SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` env vars) or the Supabase insert itself errors.
+**Symptom:** submitting the enquiry form (tested on `/contact`) showed the red error "Something went wrong saving your enquiry. Please try WhatsApp instead." — the generic error `app/api/enquiries/route.ts` returns whenever either `supabaseAdmin()` throws (missing/bad `SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` env vars) or the Supabase insert itself errors.
 
-**Diagnosis steps taken so far:**
-1. Checked the Supabase Table Editor (project `intercoutra-shuttle-site`, `fqdxiwondspynpiplrjq`) — confirmed the `enquiries` table **did not exist yet**. This alone was enough to cause every submission to fail, since the INSERT has nothing to write to.
-2. **Fix applied:** ran `edge-functions/create-enquiries-table.sql` in the Supabase SQL Editor. Confirmed success, `enquiries` now appears in the Table Editor.
-3. **Re-tested** the same form submission (real data: name "Thanyane John Adrian Mathidi", phone `+27699324208`, email `adrian.mathidi@gmail.com`, service Eswatini Shuttle) — **still failed** with the exact same generic error.
-4. Since the table now genuinely exists, the leading hypothesis is that **Vercel's `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` env vars are missing, wrong, or were never picked up by a deployment** (Vercel typically needs a fresh deploy after env vars are added/changed for serverless functions to see them).
+**Diagnosis:**
+1. Checked the Supabase Table Editor — confirmed the `enquiries` table **did not exist yet**. Fixed by running `edge-functions/create-enquiries-table.sql` in the Supabase SQL Editor.
+2. Re-tested — **still failed** with the same generic error.
+3. Checked Vercel → Project → Settings → Environment Variables — **zero environment variables were configured at all.** This was the actual root cause: the app had no way to reach Supabase.
 
-**Next steps handed to Adrian (not yet confirmed done as of this doc update):**
-1. Vercel → Project → Settings → Environment Variables. Confirm these all exist with real, non-blank values, applied at least to **Production**:
-   - `SUPABASE_URL` = `https://fqdxiwondspynpiplrjq.supabase.co`
-   - `SUPABASE_SERVICE_ROLE_KEY` = the `service_role` secret key from Supabase → Project Settings → API
-   - `SUPABASE_ANON_KEY` = the `anon` `public` key from the same page
-   - `ADMIN_PASSWORD` = any chosen password for `/admin`
-   - `ADMIN_SESSION_TOKEN` = any long random string
-2. If any were missing or just added/edited, **redeploy** (Deployments → latest → ⋯ → Redeploy) — env var changes don't retroactively apply to an already-built deployment.
-3. Re-test the same form submission.
-4. **If it still fails after that:** the next diagnostic step is Vercel's function logs, not more guessing. Deployments → the relevant deployment → Functions/Logs tab → filter for `/api/enquiries` → find the real underlying error (it'll be a proper Postgres/Supabase error message, not the generic visitor-facing one). That log line is what determines the actual next fix — could be a wrong key, a typo'd URL, an RLS issue (shouldn't be, since the service role key bypasses RLS, but verify `SUPABASE_SERVICE_ROLE_KEY` is genuinely the *service role* key and not the anon key pasted into the wrong slot), or something else entirely.
+**Fix applied:** added all 5 required env vars in Vercel (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `ADMIN_PASSWORD`, `ADMIN_SESSION_TOKEN` — via the "paste .env contents into the Key field" shortcut in Vercel's Add Environment Variable dialog, which auto-splits a pasted block into separate rows), applied to Production and Preview, then redeployed.
 
-**Whoever picks this up:** check whether Adrian has since reported success or a new error before repeating steps 1–3. If §8 item 1 above still shows this as open, assume steps 1–4 have not been completed/confirmed yet.
+**Confirmed working end-to-end 2026-08-14** — enquiry submission succeeds, row appears in `enquiries`, and (per Adrian) the full pipeline is functioning. This closes out what was previously the top-priority outstanding item.
 
 ---
 
