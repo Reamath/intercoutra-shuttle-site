@@ -107,7 +107,8 @@ Brand: **black / white / red**, "Safe. Reliable. Comfortable." positioning. Prem
 - Typography: Poppins (headings) + Inter (body), loaded via `next/font/google` in `app/layout.tsx`, exposed as CSS vars `--font-poppins` / `--font-inter`.
 - **No emojis anywhere** — every icon is a hand-drawn inline SVG (24×24-ish viewBox, `stroke="currentColor"`, `stroke-width="2"`, round caps), following a convention that predates this rebuild and was explicitly re-enforced during it (see `components/ComfortPackIcons.tsx` for the canonical example — the Water/Snacks/Wet Wipes/Wi-Fi icon set, shared between the homepage and the Eswatini page so they never drift apart visually).
 - Checkmark lists (`.check-list` class) use a small red circle with a check glyph — not green (green was a mistake introduced then corrected during the rebuild).
-- Only real photography — no AI-generated or stock images. All images live in `public/images/`, migrated from the old static site (`images/fleet/*.jpg` — real photos of the Mercedes-Benz Vito Tourer and BMW 320d/320i/M Sport, `images/routes/*.jpg` — real Cape Town/Durban/Sandton/Eswatini destination photos, `images/hero-fleet-jhb-skyline.png` — real photo of 3 fleet vehicles against the Johannesburg skyline, used as the homepage hero). **When new pages need images, reuse these — don't fetch stock photos.** Adrian has said he'll supply new/better photos later (e.g. dedicated tour photos for Soweto/Cape Town) — until then the tour pages reuse the JHB skyline and Cape Town coastline photos as reasonable stand-ins.
+- Only real photography — no AI-generated or stock images. All images live in `public/images/`. Originals migrated from the old static site (`images/fleet/*.jpg` — real photos of the Mercedes-Benz Vito Tourer and BMW 320d/320i/M Sport, `images/routes/*.jpg` — real Cape Town/Durban/Sandton/Eswatini destination photos, `images/hero-fleet-jhb-skyline.png` — real photo of 3 fleet vehicles against the Johannesburg skyline, used as the homepage hero). Adrian has since supplied dedicated hero photos for two service pages: `images/eswatini-hero.jpg` (a real Eswatini landscape) and `images/soweto-orlando-towers.jpg` (Orlando Towers, Soweto) — Cape Town still reuses the `images/routes/cape-town.jpg` destination photo as a placeholder. **When new pages need images, reuse what's already in `public/images/` — don't fetch stock photos**, and ask Adrian/Lawrence for real photos rather than substituting anything generated.
+- **Image file size matters.** Adrian supplied the Eswatini hero as a 26MB/3456×4608 PNG straight off a phone/camera — that would have hurt page load and permanently bloated the git repo for zero visual benefit at web display sizes. It was resized to 1800×2400 and recompressed to a ~0.7MB JPEG (PowerShell + `System.Drawing`, no extra tools needed — ImageMagick etc. aren't installed in this environment) before being committed. **Do this for any future large photo Adrian sends** — check file size/dimensions first (`file path/to/image.png` in Bash shows dimensions), and resize/recompress anything over a few MB before adding it to `public/images/`.
 - License plates: historically blurred by default on public photos, with explicit per-image exceptions from Adrian. The current hero image (`hero-fleet-jhb-skyline.png`) is a known exception — plates are NOT blurred on it, by Adrian's explicit instruction.
 - Mobile-first is taken seriously: most traffic is expected to come from ads on mobile. **A recurring real bug class during this rebuild was inline React `style={{ gridTemplateColumns: ... }}` overrides silently defeating the CSS media queries that stack columns on mobile** (inline styles always win over stylesheet rules, including ones inside `@media`). Two instances of this were found and fixed. If you add any grid/flex layout, verify at 375px width that `document.body.scrollWidth === document.body.clientWidth` (zero horizontal overflow) before calling it done — don't just eyeball desktop.
 
@@ -178,7 +179,7 @@ In rough priority order:
 2. ~~Confirm the `enquiries` table migration was actually run~~ — **Done, 2026-08-13.** Table exists, confirmed in Supabase Table Editor.
 3. ~~Confirm all Vercel env vars are set~~ — **Done, 2026-08-14.** All 5 required vars added, redeployed, confirmed working. Also separately resolved: the Framework Preset 404 issue from just after the rebuild (§10, Issue A).
 4. **Google Search Console** — needs re-verification/re-submission of the new sitemap, since every URL on the site changed shape.
-5. **Real tour photography** for Soweto and Cape Town — currently reusing the JHB skyline and Cape Town coastline photos as placeholders. Swap in real, dedicated tour photos when Adrian/Lawrence supply them.
+5. **Real tour photography for Cape Town** — still reusing the Cape Town coastline destination photo as a placeholder (Eswatini and Soweto both got real dedicated hero photos on 2026-08-14). Swap in a real, dedicated Cape Town tour photo when Adrian/Lawrence supply one.
 6. **GA4 / Meta Pixel IDs** — not supplied yet. Analytics code is ready and waiting for `NEXT_PUBLIC_GA_MEASUREMENT_ID` / `NEXT_PUBLIC_META_PIXEL_ID`.
 7. **Real testimonials** — long-standing item from before the rebuild too. Adrian has said he can't get real customer quotes yet. **Do not fabricate testimonials, review counts, or "trusted by X" claims** — this is a hard rule that's been re-stated multiple times across this project's history.
 8. **Nav length** — flagged as a discussion point, not acted on: the nav has 7 items (Home + 4 services + About + Contact) plus a WhatsApp button, which is tight but not yet overflowing. Consider consolidating the 4 service links under a "Services" dropdown if it ever starts wrapping.
@@ -300,8 +301,8 @@ export const SERVICES: Record<ServiceSlug, ServiceInfo> = {
       "Daily departures",
       "Professional drivers",
     ],
-    image: "/images/fleet/vito-2.jpg",
-    imageAlt: "Intercoutra Mercedes-Benz Vito Tourer used on the Eswatini shuttle route",
+    image: "/images/eswatini-hero.jpg",
+    imageAlt: "Eswatini",
     whatsappMessage: "Hi Intercoutra, I'd like to enquire about the shared shuttle to Eswatini.",
     ctaLabel: "Enquire Now",
   },
@@ -320,8 +321,8 @@ export const SERVICES: Record<ServiceSlug, ServiceInfo> = {
       "Professional guides",
       "Flexible tour options",
     ],
-    image: "/images/hero-fleet-jhb-skyline.png",
-    imageAlt: "Johannesburg skyline",
+    image: "/images/soweto-orlando-towers.jpg",
+    imageAlt: "Orlando Towers, Soweto",
     whatsappMessage: "Hi Intercoutra, I'd like to enquire about a Johannesburg/Soweto tour.",
     ctaLabel: "Plan My Tour",
   },
