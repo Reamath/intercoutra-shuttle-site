@@ -159,7 +159,7 @@ export default function EswatiniPage() {
                   <h3>Return (Eswatini to SA)</h3>
                   <p>02:00 PM — Manzini, departure</p>
                   <p>03:00 PM — Mbabane</p>
-                  <p>O.R. Tambo — drop-off, subject to arrangement</p>
+                  <p>07:00 PM — O.R. Tambo, drop-off (subject to arrangement)</p>
                   <p>08:00 PM — Sandton, arrival</p>
                 </div>
               </div>
