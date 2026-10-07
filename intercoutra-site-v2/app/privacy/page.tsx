@@ -58,7 +58,7 @@ export default function PrivacyPage() {
           <p className="text-muted" style={{ fontSize: 14.5 }}>
             bookings@intercoutra.co.za
             <br />
-            +27 74 351 8384
+            + 27 66 286 9427
           </p>
 
           <p className="text-muted" style={{ fontSize: 12.5, marginTop: 30, fontStyle: "italic" }}>

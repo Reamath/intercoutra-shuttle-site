@@ -4,7 +4,7 @@
 export const SITE_URL = "https://www.intercoutra.co.za";
 
 export const CONTACT = {
-  phonePrimary: "+27 74 351 8384",
+  phonePrimary: "+ 27 66 286 9427",
   phoneSecondary: "+27 66 286 9427",
   whatsappNumber: "27743518384", // no leading +, wa.me format
   email: "bookings@intercoutra.co.za",
